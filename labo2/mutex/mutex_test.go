@@ -14,9 +14,10 @@ func TestMutex_ask(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			m := &Mutex{false}
+			m := &Mutex{false, nil, nil, 0 }
 
-			m.ask()
+			m.Init()
+			m.Ask()
 
 			if m.asked != true {
 				t.Errorf("Asked is %v, want %v", m.asked, true)
@@ -41,7 +42,7 @@ func TestMutex_end(t *testing.T) {
 				asked: tt.fields.asked,
 			}
 
-			m.end()
+			m.End()
 
 			if m.asked != false {
 				t.Errorf("Asked is %v, want %v", m.asked, false)
