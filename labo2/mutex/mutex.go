@@ -68,12 +68,12 @@ type Mutex struct {
  * This method is responsible to initialize everything in order.
  * ALWAYS CALL IT BEFORE DOING ANYTHING ELSE
  */
-func (m *Mutex) Init(id uint16, stamp uint32, netWorker Network) {
+func (m *Mutex) Init(id uint16, initialStamp uint32, netWorker Network) {
 
 	m.private = mutexPrivate{
 		N:         0, // Dead
 		me:        id,
-		stamp:     stamp,
+		stamp:     initialStamp,
 		state:     REST,
 		stampAsk:  0,
 		pDiff:     make(map[uint16]bool),
