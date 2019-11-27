@@ -4,7 +4,9 @@ import (
 	"fmt"
 )
 
-
+/**
+ * ENUM declaration of the states
+ */
 const (
 	REST = iota
 	WAITING
@@ -17,7 +19,7 @@ const (
 type Network interface {
 	Req(stamp uint32, id uint16)
 	Ok(stamp uint32, id uint16)
-	Update(value uint32)
+	Update(value uint)
 }
 
 /**
@@ -116,7 +118,9 @@ func (m *Mutex) manager() {
 			case <- m.channels.endChan:
 				m.incrementClock(0)
 				m.private.state = REST		// Leaving SC
+				m.private.netWorker.Update(m.resource)
 				m.okAll() // Sending ok to the differed Ps
+
 
 			// P asked a token
 			case message := <- m.channels.reqChan:
@@ -157,6 +161,8 @@ func (m *Mutex) manager() {
 	}
 }
 
+// CLIENT SIDE METHODS --------------------------------
+
 /**
  * Call this to ask the network for a future usage of the SC
  */
@@ -177,6 +183,8 @@ func (m *Mutex) Wait() {
 func (m *Mutex) End() {
 	m.channels.endChan <- true
 }
+
+// SEVER SIDE METHOD ---------------------------------
 
 /**
  * Pass an incoming network REQ here
@@ -207,6 +215,8 @@ func (m *Mutex) Ok(stamp uint32, id uint16) {
 func (m *Mutex) ReqUpdate(value uint) {
 	m.channels.updateChan <- value
 }
+
+// PRIVATE utils methods ---------------------------------
 
 /**
  * Sends ok to all differed P in network

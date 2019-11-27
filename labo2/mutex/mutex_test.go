@@ -10,7 +10,7 @@ type NetworkMock struct {}
 
 func (n NetworkMock) Req(stamp uint32, id uint16){}
 func (n NetworkMock) Ok(stamp uint32, id uint16){}
-func (n NetworkMock) Update(value uint32){}
+func (n NetworkMock) Update(value uint){}
 
 func TestMutex_Ask_Increment(t *testing.T) {
 	type fields struct {
