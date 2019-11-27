@@ -123,11 +123,14 @@ func (m *Mutex) manager() {
 				fmt.Printf("Req received from %d", message.id)
 				m.incrementClock(message.stamp) // Increment, max between mine and P
 
-				if m.private.state != REST &&
+				if m.private.state == CRITICAL ||
+					m.private.state == WAITING &&
 					m.private.stampAsk < message.stamp ||
 					(m.private.stampAsk == message.stamp && m.private.me < message.id) {
+
 					m.private.pDiff[message.id] = true // We have to differ the obtain from other P
 				} else {
+
 					m.private.pWait[message.id] = true // Adding to waiting set
 					m.private.netWorker.Ok(m.private.stamp, message.id) //Sending the signal
 				}
