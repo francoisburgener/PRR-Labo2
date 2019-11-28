@@ -36,9 +36,9 @@ func ConvertMessageToBytes(msg message.Message) []byte{
 	id := uint16ToByteArray(msg.Id)
 	stamp := uint32ToByteArray(msg.Stamp)
 
+	buf = append(buf, msg.Type...)
 	buf = append(buf, stamp...)
 	buf = append(buf, id...)
-	buf = append(buf, msg.Type...)
 	return buf
 }
 

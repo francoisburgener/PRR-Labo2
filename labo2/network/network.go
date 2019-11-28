@@ -9,11 +9,23 @@ import (
 )
 
 /************************************************
+*                   INTERFACE       		    *
+*************************************************/
+type Mutex interface {
+	REQ(stamp uint32, id uint16)
+	OK(stamp uint32, id uint16)
+	UPDATE(value uint)
+}
+
+/************************************************
 *                   STRUCTURE       		    *
 *************************************************/
 type Network struct {
+	id uint16
+	nProc int
 	directory map[uint16]net.Conn
 	Done chan string
+	mutex Mutex
 }
 
 /************************************************
@@ -37,16 +49,29 @@ func (n *Network) REQ(stamp uint32, id uint16){
  * @param id of the processus
  */
 func (n *Network) OK(stamp uint32, id uint16){
-	msg := utils.InitMessage(stamp,id,[]byte("OK"))
+	msg := utils.InitMessage(stamp,id,[]byte("OK_"))
 	buf := utils.ConvertMessageToBytes(msg);
 	n.directory[id].Write(buf)
+}
+
+/**
+ * Method of Network to send a UPDATE message
+ * @param value to update
+ * @param id of the processus
+ */
+func (n *Network) UPDATE(value uint){
+	for i:=0; i < len(n.directory) + 1; i++{
+		if i != int(n.id){
+			n.directory[uint16(i)].Write([]byte("UDP" + strconv.Itoa(int(value))))
+		}
+	}
 }
 
 
 /**
  * Method to init a new Network
  */
-func (n *Network) initServ(id uint16, N int){
+func (n *Network) initServ(id uint16){
 	addr := utils.AddressByID(id)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
@@ -55,7 +80,7 @@ func (n *Network) initServ(id uint16, N int){
 
 	for {
 
-		if len(n.directory) == N-1{
+		if len(n.directory) == n.nProc-1{
 			n.Done <- "done"
 		}
 
@@ -85,8 +110,8 @@ func (n *Network) initServ(id uint16, N int){
  * @param id of the processus to connect
  * @param N number of processus
  */
-func (n *Network) initAllConn(id uint16, N int) {
-	for i:=0 ; i < N; i++ {
+func (n *Network) initAllConn(id uint16) {
+	for i:=0 ; i < n.nProc; i++ {
 		if i != int(id) {
 			n.initConn(i,id)
 		}
@@ -116,13 +141,16 @@ func (n *Network)initConn(i int,id uint16) {
  * @param id of the processus
  * @param N number of processus
  */
-func (n *Network) Init(id uint16,N int) {
+func (n *Network) Init(id uint16,N int, mutex Mutex) {
 	n.directory = make(map[uint16]net.Conn,N)
 	n.Done = make(chan string)
+	n.mutex = mutex;
+	n.id = id
+	n.nProc = N
 
 	go func() {
-		n.initAllConn(id,N)
-		n.initServ(id,N)
+		n.initAllConn(id)
+		n.initServ(id)
 	}()
 
 	<- n.Done
@@ -147,22 +175,30 @@ func (n *Network)handleConn(conn net.Conn) {
 
 func (n *Network) decodeMessage(bytes []byte,l int) {
 
-	stamp := utils.ConverByteArrayToUint32(bytes[0:4])
-	id := utils.ConverByteArrayToUint16(bytes[4:6])
-	_type := string(bytes[6:l])
+	_type := string(bytes[0:3])
+	var stamp uint32
+	var id uint16
+	var value uint
+
+	if(_type == "UDP"){
+		tmp, err := strconv.Atoi(string(bytes[3:l]))
+		if err != nil{
+			log.Fatal(err)
+		}
+		value = uint(tmp)
+	}else{
+		stamp = utils.ConverByteArrayToUint32(bytes[3:7])
+		id = utils.ConverByteArrayToUint16(bytes[7:l])
+	}
 
 	switch _type {
 	case "REQ":
-		//TODO call REQ method mutex
-		fmt.Println(_type + " stamp:" + strconv.Itoa(int(stamp)) + " id:" + strconv.Itoa(int(id)))
-	case "OK":
-		//TODO call OK method mutex
-		fmt.Println(_type + " stamp:" + strconv.Itoa(int(stamp)) + " id:" + strconv.Itoa(int(id)))
+		n.mutex.REQ(stamp,id)
+	case "OK_":
+		n.mutex.OK(stamp,id)
 	case "UPD":
-		//TODO call UPDATE method mutex
+		n.mutex.UPDATE(value)
 	}
-
-
 }
 
 
@@ -171,10 +207,12 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 	n := Network{}
 	n.directory = make(map[uint16]net.Conn,2)
 	n.Done = make(chan string)
+	n.nProc = 2
 
-	go n.initServ(2,2)
+	go n.initServ(2)
 	n.initConn(2,1)
 	n.REQ(50000,2)
+	//n.UPDATE(42)
 	select {
 
 	}
