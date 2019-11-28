@@ -18,8 +18,9 @@ func (p *Processus) Init(id uint16, N int){
 	p.Net = network.Network{}
 	p.Mut = mutex.Mutex{}
 
-	p.Net.Init(id,N,&p.Mut)
+	//TODO init random stamp
+	p.Mut.Init(p.Id,0,&p.Net)
+	p.Net.Init(p.Id,N,&p.Mut)
 
-	//TODO init mutex
 
 }

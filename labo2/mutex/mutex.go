@@ -17,9 +17,9 @@ const (
  * Interface wanted for the Network
  */
 type Network interface {
-	Req(stamp uint32, id uint16)
-	Ok(stamp uint32, id uint16)
-	Update(value uint)
+	REQ(stamp uint32, id uint16)
+	OK(stamp uint32, id uint16)
+	UPDATE(value uint)
 }
 
 /**
@@ -118,7 +118,7 @@ func (m *Mutex) manager() {
 			case <- m.channels.endChan:
 				m.incrementClock(0)
 				m.private.state = REST		// Leaving SC
-				m.private.netWorker.Update(m.resource)
+				m.private.netWorker.UPDATE(m.resource)
 				m.okAll() // Sending ok to the differed Ps
 
 
@@ -136,7 +136,7 @@ func (m *Mutex) manager() {
 				} else {
 
 					m.private.pWait[message.id] = true // Adding to waiting set
-					m.private.netWorker.Ok(m.private.stamp, message.id) //Sending the signal
+					m.private.netWorker.OK(m.private.stamp, message.id) //Sending the signal
 				}
 
 			// P sent Ok
@@ -223,7 +223,7 @@ func (m *Mutex) Update(value uint) {
  */
 func (m *Mutex) okAll() {
 	for key, _ := range m.private.pDiff {
-		m.private.netWorker.Ok(m.private.stamp, key)
+		m.private.netWorker.OK(m.private.stamp, key)
 	}
 
 	// Clean the structure
@@ -236,7 +236,7 @@ func (m *Mutex) okAll() {
 func (m *Mutex) reqAll() {
 	for key, _ := range m.private.pWait  {
 		fmt.Printf("Sending req to %d", key)
-		m.private.netWorker.Req(m.private.stamp, key)
+		m.private.netWorker.REQ(m.private.stamp, key)
 	}
 }
 

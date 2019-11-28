@@ -28,7 +28,7 @@ func argValue() (uint16, int) {
 	id,err :=strconv.Atoi(proc)
 	N,err :=strconv.Atoi(procN)
 	if err != nil {
-		log.Print("Veuillez mettre un chiffre")
+		log.Fatal("Please put a number !")
 	}
 
 	return uint16(id),N
@@ -37,15 +37,15 @@ func argValue() (uint16, int) {
 
 func console(p *processus.Processus,id uint16) {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Choix (nombre)")
+	fmt.Println("Choice (number)")
 	fmt.Println("---------------------")
 	for{
-		fmt.Println("1 - Lire la valeur critique")
-		fmt.Println("2 - Modifier la valeur critique")
-		text, _ := reader.ReadString('\n')
-		text = strings.Replace(text, "\n", "", -1)
+		fmt.Println("1 - Read critical value")
+		fmt.Println("2 - Update critical value")
+		choice, _ := reader.ReadString('\n')
+		choice = strings.Replace(choice, "\n", "", -1)
 
-		switch text {
+		switch choice {
 		case "1":
 			//TODO
 		case "2":
