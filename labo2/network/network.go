@@ -12,9 +12,9 @@ import (
 *                   INTERFACE       		    *
 *************************************************/
 type Mutex interface {
-	REQ(stamp uint32, id uint16)
-	OK(stamp uint32, id uint16)
-	UPDATE(value uint)
+	Req(stamp uint32, id uint16)
+	Ok(stamp uint32, id uint16)
+	Update(value uint)
 }
 
 /************************************************
@@ -71,8 +71,8 @@ func (n *Network) UPDATE(value uint){
 /**
  * Method to init a new Network
  */
-func (n *Network) initServ(id uint16){
-	addr := utils.AddressByID(id)
+func (n *Network) initServ(){
+	addr := utils.AddressByID(n.id)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatal(err)
@@ -97,7 +97,7 @@ func (n *Network) initServ(id uint16){
 		}
 		str := string(tmp[0:l])
 		idConn, err := strconv.Atoi(str)
-		fmt.Println("Serv Connection between P" + strconv.Itoa(int(id)) + " and P" + strconv.Itoa(idConn))
+		log.Println("Serv Connection between P" + strconv.Itoa(int(n.id)) + " and P" + strconv.Itoa(idConn))
 		n.directory[uint16(idConn)] = conn
 
 		go n.handleConn(conn)
@@ -110,10 +110,10 @@ func (n *Network) initServ(id uint16){
  * @param id of the processus to connect
  * @param N number of processus
  */
-func (n *Network) initAllConn(id uint16) {
+func (n *Network) initAllConn() {
 	for i:=0 ; i < n.nProc; i++ {
-		if i != int(id) {
-			n.initConn(i,id)
+		if i != int(n.id) {
+			n.initConn(i)
 		}
 	}
 }
@@ -124,15 +124,15 @@ func (n *Network) initAllConn(id uint16) {
  * @param i id of the processus we want to connect
  * @param id of our processus
  */
-func (n *Network)initConn(i int,id uint16) {
+func (n *Network)initConn(i int) {
 	addr := utils.AddressByID(uint16(i))
 	conn, err := net.Dial("tcp", addr)
 	if err != nil {
 		log.Printf("Connection refused with P%d",i)
 	}else{
 		n.directory[uint16(i)] = conn
-		conn.Write([]byte(strconv.Itoa(int(id))))
-		fmt.Println("Dial Connection between P" + strconv.Itoa(int(id)) + " and P" + strconv.Itoa(i))
+		conn.Write([]byte(strconv.Itoa(int(n.id))))
+		log.Println("Dial Connection between P" + strconv.Itoa(int(n.id)) + " and P" + strconv.Itoa(i))
 	}
 }
 
@@ -149,8 +149,8 @@ func (n *Network) Init(id uint16,N int, mutex Mutex) {
 	n.nProc = N
 
 	go func() {
-		n.initAllConn(id)
-		n.initServ(id)
+		n.initAllConn()
+		n.initServ()
 	}()
 
 	<- n.Done
@@ -193,11 +193,11 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 
 	switch _type {
 	case "REQ":
-		n.mutex.REQ(stamp,id)
+		n.mutex.Req(stamp,id)
 	case "OK_":
-		n.mutex.OK(stamp,id)
+		n.mutex.Ok(stamp,id)
 	case "UPD":
-		n.mutex.UPDATE(value)
+		n.mutex.Update(value)
 	}
 }
 

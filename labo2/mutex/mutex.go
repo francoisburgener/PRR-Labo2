@@ -212,7 +212,7 @@ func (m *Mutex) Ok(stamp uint32, id uint16) {
  * SETTER: call this if you want to change the SC val
  * Never call if without being in SC (ask, wait, update, end)
  */
-func (m *Mutex) ReqUpdate(value uint) {
+func (m *Mutex) Update(value uint) {
 	m.channels.updateChan <- value
 }
 

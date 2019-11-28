@@ -1,16 +1,26 @@
 package main
 
 import (
-	"PRR-Labo2/labo2/network"
+	"PRR-Labo2/labo2/processus"
 	"bufio"
+	"flag"
 	"fmt"
+	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
-
 func main(){
-	/*var proc string
+	id,N := argValue()
+	p := processus.Processus{}
+	p.Init(uint16(id),N)
+	fmt.Println("\nInitialisation done\n")
+	console(&p, uint16(id))
+}
+
+func argValue() (uint16, int) {
+	var proc string
 	var procN string
 	flag.StringVar(&proc, "proc", "", "Usage")
 	flag.StringVar(&procN, "N", "", "Usage")
@@ -20,15 +30,12 @@ func main(){
 	if err != nil {
 		log.Print("Veuillez mettre un chiffre")
 	}
-	n := network.Network{}
-	n.Init(uint16(id),N)
 
-	fmt.Println("\nInitialisation done\n")
+	return uint16(id),N
 
-	console(&n, uint16(id))*/
 }
 
-func console(n *network.Network,id uint16) {
+func console(p *processus.Processus,id uint16) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Choix (nombre)")
 	fmt.Println("---------------------")
@@ -40,9 +47,9 @@ func console(n *network.Network,id uint16) {
 
 		switch text {
 		case "1":
-			n.REQ(0,1)
+			//TODO
 		case "2":
-			n.OK(0,id)
+			//TODO
 		default:
 			fmt.Println("Choose 1 or 2")
 		}
