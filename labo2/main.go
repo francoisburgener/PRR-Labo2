@@ -42,6 +42,10 @@ func console(p *processus.Processus,id uint16) {
 	for{
 		fmt.Println("1 - Read critical value")
 		fmt.Println("2 - Update critical value")
+		fmt.Println("3 - Quit")
+		fmt.Print("> ")
+
+
 		choice, _ := reader.ReadString('\n')
 		choice = strings.Replace(choice, "\n", "", -1)
 
@@ -50,6 +54,8 @@ func console(p *processus.Processus,id uint16) {
 			//TODO
 		case "2":
 			//TODO
+		case "3":
+			os.Exit(0)
 		default:
 			fmt.Println("Choose 1 or 2")
 		}
