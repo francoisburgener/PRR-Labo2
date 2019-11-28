@@ -1,28 +1,51 @@
 package main
 
 import (
+	"PRR-Labo2/labo2/network"
+	"bufio"
 	"fmt"
-	"time"
+	"os"
+	"strings"
 )
-import "prr-labo2/labo2/mutex"
 
-type NetworkMock struct {}
 
-func (n NetworkMock) Req(stamp uint32, id uint16){}
-func (n NetworkMock) Ok(stamp uint32, id uint16){}
-func (n NetworkMock) Update(value uint32){}
+func main(){
+	/*var proc string
+	var procN string
+	flag.StringVar(&proc, "proc", "", "Usage")
+	flag.StringVar(&procN, "N", "", "Usage")
+	flag.Parse()
+	id,err :=strconv.Atoi(proc)
+	N,err :=strconv.Atoi(procN)
+	if err != nil {
+		log.Print("Veuillez mettre un chiffre")
+	}
+	n := network.Network{}
+	n.Init(uint16(id),N)
 
-func main() {
-	fmt.Println("Hello words")
+	fmt.Println("\nInitialisation done\n")
 
-	mutex := mutex.Mutex{}
- 	n := NetworkMock{}
-	mutex.Init(1, 1, n)
+	console(&n, uint16(id))*/
+}
 
-	mutex.Ask()
+func console(n *network.Network,id uint16) {
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Println("Choix (nombre)")
+	fmt.Println("---------------------")
+	for{
+		fmt.Println("1 - Lire la valeur critique")
+		fmt.Println("2 - Modifier la valeur critique")
+		text, _ := reader.ReadString('\n')
+		text = strings.Replace(text, "\n", "", -1)
 
-	mutex.Req(3,3)
-
- 	time.Sleep(time.Second * 1)
+		switch text {
+		case "1":
+			n.REQ(0,1)
+		case "2":
+			n.OK(0,id)
+		default:
+			fmt.Println("Choose 1 or 2")
+		}
+	}
 
 }
