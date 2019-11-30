@@ -261,6 +261,8 @@ func (m *Mutex) Update(value uint) {
  */
 func (m *Mutex) okAll() {
 	for key, _ := range m.private.pDiff {
+		// Since we are sending ok, we now have to wait on him
+		m.private.pWait[key] = true
 		m.private.netWorker.OK(m.private.stamp, key)
 	}
 
