@@ -44,7 +44,7 @@ func (n *Network) REQ(stamp uint32, id uint16){
 	if err != nil{
 		log.Fatal(err)
 	}
-	log.Printf("Network: type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
+	log.Printf("Network: Send message type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
 
 }
 
@@ -61,7 +61,7 @@ func (n *Network) OK(stamp uint32, id uint16){
 	if err != nil{
 		log.Fatal(err)
 	}
-	log.Printf("Network: type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
+	log.Printf("Network: Send message type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
 }
 
 /**
@@ -76,7 +76,7 @@ func (n *Network) UPDATE(value uint){
 			if err != nil{
 				log.Fatal(err)
 			}
-			log.Printf("Network: Update P%d value: %d",i,value)
+			log.Printf("Network: Send message Update P%d value: %d",i,value)
 		}
 	}
 }
@@ -195,6 +195,7 @@ func (n *Network)handleConn(conn net.Conn) {
 		log.Printf("Error reading:", err.Error())
 	}
 
+	log.Printf("Receive message %s",buf)
 	n.decodeMessage(buf,l)
 }
 
