@@ -9,7 +9,7 @@ import (
 )
 
 const(
-	messageREQ    = "messageREQ"
+	messageREQ    = "REQ"
 	messageOK     = "OK_"
 	messageUPDATE = "UPD"
 )
@@ -45,7 +45,7 @@ type Network struct {
  * @param id of the processus
  */
 func (n *Network) REQ(stamp uint32, id uint16){
-	msg := utils.InitMessage(stamp,n.id,[]byte("messageREQ"))
+	msg := utils.InitMessage(stamp,n.id,[]byte(messageREQ))
 	_, err := n.directory[id].Write(msg)
 
 	if err != nil{
@@ -222,7 +222,7 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 	var id uint16
 	var value uint
 
-	fmt.Println(bytes)
+	fmt.Println(bytes, "len", l)
 
 	if _type == messageUPDATE {
 		tmp, err := strconv.Atoi(string(bytes[3:l]))
