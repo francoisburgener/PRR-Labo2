@@ -4,7 +4,6 @@ import (
 	"PRR-Labo2/labo2/processus"
 	"bufio"
 	"flag"
-	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -15,7 +14,7 @@ func main(){
 	id,N := argValue()
 	p := processus.Process{}
 	p.Init(id,N)
-	fmt.Println("\nInitialisation done\n")
+	log.Println("\nClient: Initialisation done\n")
 	console(&p)
 }
 
@@ -28,7 +27,7 @@ func argValue() (uint16, uint16) {
 	id,err :=strconv.Atoi(proc)
 	N,err :=strconv.Atoi(procN)
 	if err != nil {
-		log.Fatal("Please put a number !")
+		log.Fatal("Client: Please put a number !")
 	}
 
 	return uint16(id),uint16(N)
@@ -37,13 +36,13 @@ func argValue() (uint16, uint16) {
 
 func console(p *processus.Process) {
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Println("Choice (number)")
-	fmt.Println("---------------------")
+	log.Println("Client: Choice (number)")
+	log.Println("Client: ---------------------")
 	for{
-		fmt.Println("1 - Read critical value")
-		fmt.Println("2 - Update critical value")
-		fmt.Println("3 - Quit")
-		fmt.Print("> ")
+		log.Println("Client: 1 - Read critical value")
+		log.Println("Client: 2 - Update critical value")
+		log.Println("Client: 3 - Quit")
+		log.Print("Client: > ")
 
 
 		choice, _ := reader.ReadString('\n')
@@ -52,18 +51,18 @@ func console(p *processus.Process) {
 		switch choice {
 		case "1":
 			a := p.Mut.GetResource()
-			fmt.Printf("Client: The resource is %d \n", a)
+			log.Printf("Client: The resource is %d \n", a)
 		case "2":
 			p.Mut.Ask()
-			fmt.Println("Client: Process is asking for the resource")
+			log.Println("Client: Process is asking for the resource")
 			p.Mut.Wait()
-			fmt.Println("Client: Other Processes gave us permission")
+			log.Println("Client: Other Processes gave us permission")
 			p.Mut.Update(42)
 			p.Mut.End()
 		case "3":
 			os.Exit(0)
 		default:
-			fmt.Println("Choose 1 or 2")
+			log.Println("Client: Choose 1 or 2")
 		}
 	}
 
