@@ -87,7 +87,8 @@ func (n *Network) OK(stamp uint32, id uint16){
 func (n *Network) UPDATE(value uint){
 	for i:=0; i < len(n.directory) + 1; i++{
 		if i != int(n.id){
-			mustCopy(n.directory[uint16(i)], bytes.NewReader([]byte(messageUPDATE + strconv.Itoa(int(value)))))
+			msg := []byte(messageUPDATE + strconv.Itoa(int(value)))
+			mustCopy(n.directory[uint16(i)], bytes.NewReader(msg))
 			/*_, err := n.directory[uint16(i)].Write([]byte(messageUPDATE + strconv.Itoa(int(value))))
 			if err != nil{
 				log.Fatal("Network error: Writing error:", err.Error())
@@ -228,7 +229,7 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 	var id uint16
 	var value uint
 
-	fmt.Println(_type, "len", l)
+	fmt.Println(bytes, "len", l)
 
 	if _type == messageUPDATE {
 		tmp, err := strconv.Atoi(string(bytes[3:l]))
