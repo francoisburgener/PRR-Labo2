@@ -39,14 +39,13 @@ type Network struct {
  */
 func (n *Network) REQ(stamp uint32, id uint16){
 	msg := utils.InitMessage(stamp,n.id,[]byte("REQ"))
-	buf := utils.ConvertMessageToBytes(msg)
-	_, err := n.directory[id].Write(buf)
+	_, err := n.directory[id].Write(msg)
 
 	if err != nil{
 		log.Fatal("Network error: Writing error:", err.Error())
 	}
 	if n.Debug{
-		log.Printf("Network: Send message type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
+		log.Printf("Network: Send message type:%s stamp:%d id:%d \n","REQ",stamp,id)
 	}
 
 }
@@ -58,22 +57,20 @@ func (n *Network) REQ(stamp uint32, id uint16){
  */
 func (n *Network) OK(stamp uint32, id uint16){
 	msg := utils.InitMessage(stamp,n.id,[]byte("OK_"))
-	buf := utils.ConvertMessageToBytes(msg);
-	_, err := n.directory[id].Write(buf)
+	_, err := n.directory[id].Write(msg)
 
 	if err != nil{
 		log.Fatal("Network error: Writing error:", err.Error())
 	}
 
 	if n.Debug{
-		log.Printf("Network: Send message type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
+		log.Printf("Network: Send message type:%s stamp:%d id:%d \n","OK_",stamp,id)
 	}
 }
 
 /**
  * Method of Network to send a UPDATE message
  * @param value to update
- * @param id of the processus
  */
 func (n *Network) UPDATE(value uint){
 	for i:=0; i < len(n.directory) + 1; i++{
@@ -95,6 +92,7 @@ func (n *Network) UPDATE(value uint){
  * Method to init the server and get all connection between processus
  * @param id of the processus
  * @param N number of processus
+ * @param mutex ref to mutex
  */
 func (n *Network) Init(id uint16,N uint16, mutex Mutex) {
 	log.Printf("Network: Initialisation ")
@@ -116,9 +114,6 @@ func (n *Network) Init(id uint16,N uint16, mutex Mutex) {
 
 /**
  * Method to init all dial connection
- * @param n reference of network
- * @param id of the processus to connect
- * @param N number of processus
  */
 func (n *Network) initAllConn() {
 	for i:=uint16(0) ; i < n.nProc; i++ {
@@ -130,9 +125,7 @@ func (n *Network) initAllConn() {
 
 /**
  * Method to init a dial connection
- * @param n reference of network
  * @param i id of the processus we want to connect
- * @param id of our processus
  */
 func (n *Network)initConn(i uint16) {
 	addr := utils.AddressByID(uint16(i))
@@ -195,7 +188,7 @@ func (n *Network) initServ(){
 }
 
 /**
- * Method to ...
+ * Method to read message
  */
 func (n *Network)handleConn(conn net.Conn) {
 	for {
