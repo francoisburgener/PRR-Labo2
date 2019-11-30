@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 )
 
 func main(){
@@ -35,9 +34,11 @@ func argValue() (uint16, uint16) {
 }
 
 func console(p *processus.Process) {
-	reader := bufio.NewReader(os.Stdin)
+
 	log.Println("Client: Choice (number)")
 	log.Println("Client: ---------------------")
+
+	scanner := bufio.NewScanner(os.Stdin)
 
 	test := uint16(1)
 
@@ -47,9 +48,8 @@ func console(p *processus.Process) {
 		log.Println("Client: 3 - Quit")
 		log.Print("Client: > ")
 
-
-		choice, _ := reader.ReadString('\n')
-		choice = strings.Replace(choice, "\n", "", -1)
+		scanner.Scan()
+		choice :=  scanner.Text()
 
 		switch choice {
 		case "1":
@@ -60,7 +60,19 @@ func console(p *processus.Process) {
 			log.Println("Client: Process is asking for the resource")
 			p.Mut.Wait()
 			log.Println("Client: Other Processes gave us permission")
-			p.Mut.Update(uint(test * (p.Id + 1)))
+			log.Println("Client: You can now enter your value")
+
+			scanner.Scan()
+			a :=  scanner.Text()
+
+			b, err := strconv.Atoi(a)
+
+			if err != nil {
+				log.Println("Enter a number please")
+				continue
+			}
+
+			p.Mut.Update(uint(b))
 			p.Mut.End()
 		case "3":
 			os.Exit(0)
