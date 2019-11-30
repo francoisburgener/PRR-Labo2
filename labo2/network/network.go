@@ -2,7 +2,6 @@ package network
 
 import (
 	"PRR-Labo2/labo2/utils"
-	"fmt"
 	"log"
 	"net"
 	"strconv"
@@ -133,7 +132,7 @@ func (n *Network)initConn(i uint16) {
 		if err != nil{
 			log.Fatal(err)
 		}
-		log.Printf("Dial Connection between P%d and P%d\n", n.id, i)
+		log.Printf("Network : Dial Connection between P%d and P%d\n", n.id, i)
 		go n.handleConn(conn)
 	}
 }
@@ -170,7 +169,7 @@ func (n *Network) initServ(){
 		}
 		str := string(tmp[0:l])
 		idConn, err := strconv.Atoi(str)
-		log.Println("Serv Connection between P" + strconv.Itoa(int(n.id)) + " and P" + strconv.Itoa(idConn))
+		log.Println("Network: Serv Connection between P" + strconv.Itoa(int(n.id)) + " and P" + strconv.Itoa(idConn))
 		n.directory[uint16(idConn)] = conn
 
 		go n.handleConn(conn)
@@ -187,7 +186,7 @@ func (n *Network)handleConn(conn net.Conn) {
 	// Read the incoming connection into the buffer.
 	l, err := conn.Read(buf)
 	if err != nil {
-		fmt.Println("Error reading:", err.Error())
+		log.Printf("Error reading:", err.Error())
 	}
 
 	n.decodeMessage(buf,l)
@@ -211,7 +210,7 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 		id = utils.ConverByteArrayToUint16(bytes[7:l])
 	}
 
-	log.Printf("Decoded message type:%s stamp:%d id:%d",_type,stamp,id)
+	log.Printf("Network: Decoded message type:%s stamp:%d id:%d",_type,stamp,id)
 
 	switch _type {
 	case "REQ":
