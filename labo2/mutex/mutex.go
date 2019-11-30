@@ -241,7 +241,7 @@ func (m *Mutex) okAll() {
  */
 func (m *Mutex) reqAll() {
 	for key, _ := range m.private.pWait  {
-		log.Printf("Sending req to %d\n", key)
+		log.Printf("Mutex: Sending req to %d\n", key)
 		m.private.netWorker.REQ(m.private.stamp, key)
 	}
 }
