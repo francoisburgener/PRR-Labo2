@@ -186,17 +186,19 @@ func (n *Network) initServ(){
  * Method to ...
  */
 func (n *Network)handleConn(conn net.Conn) {
-	// Make a buffer to hold incoming data.
-	buf := make([]byte, 32)
+	for {
+		// Make a buffer to hold incoming data.
+		buf := make([]byte, 32)
 
-	// Read the incoming connection into the buffer.
-	l, err := conn.Read(buf)
-	if err != nil {
-		log.Printf("Error reading:", err.Error())
+		// Read the incoming connection into the buffer.
+		l, err := conn.Read(buf)
+		if err != nil {
+			log.Printf("Error reading:", err.Error())
+		}
+
+		log.Printf("Receive message %s",buf)
+		n.decodeMessage(buf,l)
 	}
-
-	log.Printf("Receive message %s",buf)
-	n.decodeMessage(buf,l)
 }
 
 func (n *Network) decodeMessage(bytes []byte,l int) {
