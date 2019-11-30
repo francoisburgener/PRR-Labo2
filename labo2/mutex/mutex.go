@@ -183,6 +183,8 @@ func (m *Mutex) Update(value uint) {
  * Every method called passes through here
  */
 func (m *Mutex) manager() {
+	log.Println("Stamp", m.private.stamp)
+
 	for {
 		select {
 		// ASK: Client called Ask()
@@ -233,6 +235,7 @@ func (m *Mutex) handleAsk() {
 	if m.Debug {
 		log.Printf("Mutex %d: Client asked me the CS", m.private.stamp)
 	}
+	log.Println("Stamp", m.private.stamp)
 }
 
 /**
@@ -247,6 +250,7 @@ func (m *Mutex) handleEnd() {
 	if m.Debug {
 		log.Printf("Mutex %d: Client released the CS", m.private.stamp)
 	}
+	log.Println("Stamp", m.private.stamp)
 }
 
 /**
@@ -274,6 +278,7 @@ func (m *Mutex) handleReq(message Message) {
 			log.Printf("Mutex: Waiting on him %d\n", key)
 		}
 	}
+	log.Println("Stamp", m.private.stamp)
 }
 
 /**
@@ -286,6 +291,7 @@ func (m *Mutex) handleOk(message Message) {
 	if m.Debug {
 		log.Printf("Mutex %d: Ok received from %d", m.private.stamp, message.id)
 	}
+	log.Println("Stamp", m.private.stamp)
 }
 
 /**
@@ -297,6 +303,7 @@ func (m *Mutex) handleUpdate(val uint) {
 	if m.Debug {
 		log.Printf("Mutex %d: someone wants to update %d -> %d", m.private.stamp, m.resource, val)
 	}
+	log.Println("Stamp", m.private.stamp)
 }
 
 /**

@@ -222,7 +222,7 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 	var id uint16
 	var value uint
 
-	fmt.Println(bytes, "len", l)
+	fmt.Println(_type, "len", l)
 
 	if _type == messageUPDATE {
 		tmp, err := strconv.Atoi(string(bytes[3:l]))

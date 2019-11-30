@@ -6,6 +6,11 @@ import (
 	"math/rand"
 )
 
+const (
+	stampMax = 100
+	stampMin = 0
+)
+
 type Process struct{
 	Id uint16
 	Net network.Network
@@ -23,10 +28,10 @@ func (p *Process) Init(id uint16, N uint16){
 		Debug: false,
 	}
 
-	const max = 100
-	const min = 1
+	// Ensures everyone has a different seed
+	rand.Seed(int64(id + N))
 
-	initStamp := uint32(rand.Intn(max - min + 1) + min)
+	initStamp := uint32(rand.Intn(stampMax - stampMin + 1) + stampMin)
 
 	p.Mut.Init(p.Id, initStamp, N, &p.Net)
 	p.Net.Init(p.Id, N, &p.Mut)

@@ -27,7 +27,7 @@ func uint16ToByteArray(i uint16) []byte{
  * @param message to convert
  */
 func InitMessage(stamp uint32,id uint16, _type []byte) []byte{
-	buf := []byte{}
+	var buf []byte
 
 	_id := uint16ToByteArray(id)
 	_stamp := uint32ToByteArray(stamp)
