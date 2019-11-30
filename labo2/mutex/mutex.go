@@ -104,7 +104,12 @@ func (m *Mutex) Init(id uint16, initialStamp uint32, numberOfProcess uint16, net
 	go m.manager()
 }
 
-// CLIENT SIDE METHODS --------------------------------
+// CLIENT SIDE API METHODS --------------------------------
+// 1. Use Ask to start asking for the SC. Non blocking
+// 2. Use Wait to wait over SC. Blocking
+// 3. Use Update to set the value once you have SC
+// 4. Use End to release SC
+// Alternatively you can use GetResource to read the value when ever you want
 
 /**
  * Call this to ask the network for a future usage of the SC
@@ -127,7 +132,18 @@ func (m *Mutex) End() {
 	m.channels.endChan <- true
 }
 
-// SEVER SIDE METHOD ---------------------------------
+/**
+ * GETTER
+ */
+func (m *Mutex) GetResource() uint {
+	m.channels.resourceChan <- 0
+	return <-m.channels.resourceChan
+}
+
+// SEVER SIDE API METHODS ---------------------------------
+// Use Req to notify incoming requests
+// Use Ok to notify incoming Ok requests
+// Use Update to set the value in SC
 
 /**
  * Pass an incoming network REQ here
@@ -149,14 +165,6 @@ func (m *Mutex) Ok(stamp uint32, id uint16) {
 		id:    id,
 	}
 	m.channels.okChan <- message
-}
-
-/**
- * GETTER
- */
-func (m *Mutex) GetResource() uint {
-	m.channels.resourceChan <- 0
-	return <-m.channels.resourceChan
 }
 
 /**
