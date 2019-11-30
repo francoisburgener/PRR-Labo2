@@ -73,7 +73,6 @@ func (n *Network) OK(stamp uint32, id uint16){
 /**
  * Method of Network to send a UPDATE message
  * @param value to update
- * @param id of the processus
  */
 func (n *Network) UPDATE(value uint){
 	for i:=0; i < len(n.directory) + 1; i++{
@@ -95,6 +94,7 @@ func (n *Network) UPDATE(value uint){
  * Method to init the server and get all connection between processus
  * @param id of the processus
  * @param N number of processus
+ * @param mutex ref to mutex
  */
 func (n *Network) Init(id uint16,N uint16, mutex Mutex) {
 	log.Printf("Network: Initialisation ")
@@ -116,9 +116,6 @@ func (n *Network) Init(id uint16,N uint16, mutex Mutex) {
 
 /**
  * Method to init all dial connection
- * @param n reference of network
- * @param id of the processus to connect
- * @param N number of processus
  */
 func (n *Network) initAllConn() {
 	for i:=uint16(0) ; i < n.nProc; i++ {
@@ -130,9 +127,7 @@ func (n *Network) initAllConn() {
 
 /**
  * Method to init a dial connection
- * @param n reference of network
  * @param i id of the processus we want to connect
- * @param id of our processus
  */
 func (n *Network)initConn(i uint16) {
 	addr := utils.AddressByID(uint16(i))
@@ -195,7 +190,7 @@ func (n *Network) initServ(){
 }
 
 /**
- * Method to ...
+ * Method to read message
  */
 func (n *Network)handleConn(conn net.Conn) {
 	for {
