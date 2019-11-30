@@ -4,6 +4,7 @@ import (
 	"PRR-Labo2/labo2/processus"
 	"bufio"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"strconv"
@@ -43,10 +44,10 @@ func console(p *processus.Process) {
 	test := uint16(1)
 
 	for{
-		log.Println("Client: 1 - Read critical value")
-		log.Println("Client: 2 - Update critical value")
-		log.Println("Client: 3 - Quit")
-		log.Print("Client: > ")
+		fmt.Println("1 - Read critical value")
+		fmt.Println("2 - Update critical value")
+		fmt.Println("3 - Quit")
+		fmt.Print("> ")
 
 		scanner.Scan()
 		choice :=  scanner.Text()
@@ -54,13 +55,13 @@ func console(p *processus.Process) {
 		switch choice {
 		case "1":
 			a := p.Mut.GetResource()
-			log.Printf("Client: The resource is %d \n", a)
+			fmt.Printf("The resource is %d \n", a)
 		case "2":
 			p.Mut.Ask()
-			log.Println("Client: Process is asking for the resource")
+			fmt.Println("Process is asking for the resource")
 			p.Mut.Wait()
-			log.Println("Client: Other Processes gave us permission")
-			log.Println("Client: You can now enter your value")
+			fmt.Println("Other Processes gave us permission")
+			fmt.Print("You can now enter your value:  ")
 
 			scanner.Scan()
 			a :=  scanner.Text()
@@ -68,7 +69,7 @@ func console(p *processus.Process) {
 			b, err := strconv.Atoi(a)
 
 			if err != nil {
-				log.Println("Enter a number please")
+				fmt.Println("Enter a number please")
 				continue
 			}
 
@@ -77,7 +78,7 @@ func console(p *processus.Process) {
 		case "3":
 			os.Exit(0)
 		default:
-			log.Println("Client: Choose 1 or 2")
+			fmt.Println("Choose 1 or 2")
 		}
 
 		test++

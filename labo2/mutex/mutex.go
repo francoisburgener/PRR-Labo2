@@ -115,7 +115,7 @@ func (m *Mutex) manager() {
 			// ASK: Client called Ask()
 			case <- m.channels.askChan:
 				if m.Debug {
-					log.Printf("Mutex: Client asked me the CS")
+					log.Printf("Mutex %d: Client asked me the CS", m.private.stamp)
 				}
 
 				if m.private.state == REST {
@@ -128,7 +128,7 @@ func (m *Mutex) manager() {
 			// END: Client released SC
 			case <- m.channels.endChan:
 				if m.Debug {
-					log.Printf("Mutex: Client released the CS")
+					log.Printf("Mutex %d: Client released the CS", m.private.stamp)
 				}
 
 				m.incrementClock(0)
@@ -140,7 +140,7 @@ func (m *Mutex) manager() {
 			// P asked a token
 			case message := <- m.channels.reqChan:
 				if m.Debug {
-					log.Printf("Mutex: Req received from %d", message.id)
+					log.Printf("Mutex %d: Req received from %d", m.private.stamp, message.id)
 				}
 
 				m.incrementClock(message.stamp) // Increment, max between mine and P
@@ -164,7 +164,7 @@ func (m *Mutex) manager() {
 			// P sent Ok
 			case message:= <- m.channels.okChan:
 				if m.Debug {
-					log.Printf("Mutex: Ok received from %d", message.id)
+					log.Printf("Mutex %d: Ok received from %d", m.private.stamp, message.id)
 				}
 
 				m.incrementClock(message.stamp) // Increment, max between mine and P
@@ -173,7 +173,7 @@ func (m *Mutex) manager() {
 			// Network told us to update
 			case val := <- m.channels.updateChan:
 				if m.Debug {
-					log.Printf("Mutex: someone wants to update %d -> %d", m.resource, val)
+					log.Printf("Mutex %d: someone wants to update %d -> %d", m.private.stamp, m.resource, val)
 				}
 				m.resource = val
 
