@@ -73,6 +73,8 @@ func console(p *processus.Process) {
 				continue
 			}
 
+			fmt.Println(" value is", b)
+
 			p.Mut.Update(uint(b))
 			p.Mut.End()
 		case "3":

@@ -2,9 +2,16 @@ package network
 
 import (
 	"PRR-Labo2/labo2/utils"
+	"fmt"
 	"log"
 	"net"
 	"strconv"
+)
+
+const(
+	messageREQ    = "messageREQ"
+	messageOK     = "OK_"
+	messageUPDATE = "UPD"
 )
 
 /************************************************
@@ -33,30 +40,30 @@ type Network struct {
 *************************************************/
 
 /**
- * Method of Network to send a REQ message
+ * Method of Network to send a messageREQ message
  * @param stamp (logic clock) of the processus
  * @param id of the processus
  */
 func (n *Network) REQ(stamp uint32, id uint16){
-	msg := utils.InitMessage(stamp,n.id,[]byte("REQ"))
+	msg := utils.InitMessage(stamp,n.id,[]byte("messageREQ"))
 	_, err := n.directory[id].Write(msg)
 
 	if err != nil{
 		log.Fatal("Network error: Writing error:", err.Error())
 	}
 	if n.Debug{
-		log.Printf("Network: Send message type:%s stamp:%d id:%d \n","REQ",stamp,id)
+		log.Printf("Network: Send message type:%s stamp:%d id:%d \n", messageREQ,stamp,id)
 	}
 
 }
 
 /**
- * Method of Network to send a REQ message
+ * Method of Network to send a messageREQ message
  * @param stamp (logic clock) of the processus
  * @param id of the processus
  */
 func (n *Network) OK(stamp uint32, id uint16){
-	msg := utils.InitMessage(stamp,n.id,[]byte("OK_"))
+	msg := utils.InitMessage(stamp,n.id,[]byte(messageOK))
 	_, err := n.directory[id].Write(msg)
 
 	if err != nil{
@@ -64,18 +71,18 @@ func (n *Network) OK(stamp uint32, id uint16){
 	}
 
 	if n.Debug{
-		log.Printf("Network: Send message type:%s stamp:%d id:%d \n","OK_",stamp,id)
+		log.Printf("Network: Send message type:%s stamp:%d id:%d \n", messageOK,stamp,id)
 	}
 }
 
 /**
- * Method of Network to send a UPDATE message
+ * Method of Network to send a messageUPDATE message
  * @param value to update
  */
 func (n *Network) UPDATE(value uint){
 	for i:=0; i < len(n.directory) + 1; i++{
 		if i != int(n.id){
-			_, err := n.directory[uint16(i)].Write([]byte("UPD" + strconv.Itoa(int(value))))
+			_, err := n.directory[uint16(i)].Write([]byte(messageUPDATE + strconv.Itoa(int(value))))
 			if err != nil{
 				log.Fatal("Network error: Writing error:", err.Error())
 			}
@@ -215,7 +222,9 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 	var id uint16
 	var value uint
 
-	if _type == "UPD"{
+	fmt.Println(bytes)
+
+	if _type == messageUPDATE {
 		tmp, err := strconv.Atoi(string(bytes[3:l]))
 		if err != nil{
 			log.Fatal("Network error: Update message without value:", err.Error())
@@ -226,7 +235,7 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 			log.Printf("Network: Decoded message type:%s value:%d",_type,value)
 		}
 
-	}else if _type == "OK_" || _type == "REQ"{
+	}else if _type == messageOK || _type == messageREQ {
 		stamp = utils.ConverByteArrayToUint32(bytes[3:7])
 		id = utils.ConverByteArrayToUint16(bytes[7:l])
 
@@ -238,11 +247,11 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 
 
 	switch _type {
-	case "REQ":
+	case messageREQ:
 		n.mutex.Req(stamp,id)
-	case "OK_":
+	case messageOK:
 		n.mutex.Ok(stamp,id)
-	case "UPD":
+	case messageUPDATE:
 		n.mutex.Update(value)
 	default:
 		log.Println("Network: Incorrect type message !")
@@ -259,8 +268,8 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 
 	go n.initServ(2)
 	n.initConn(2,1)
-	n.REQ(50000,2)
-	//n.UPDATE(42)
+	n.messageREQ(50000,2)
+	//n.messageUPDATE(42)
 	select {
 
 	}
