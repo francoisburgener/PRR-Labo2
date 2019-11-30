@@ -121,6 +121,7 @@ func (n *Network)initConn(i uint16) {
 		conn.Write([]byte(strconv.Itoa(int(n.id))))
 		//log.Println("Dial Connection between P" + strconv.Itoa(int(n.id)) + " and P" + strconv.Itoa(i))
 		log.Printf("Dial Connection between P%d and P%d\n", n.id, i)
+		go n.handleConn(conn)
 	}
 }
 
