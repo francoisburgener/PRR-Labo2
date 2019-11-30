@@ -206,7 +206,7 @@ func (n *Network)handleConn(conn net.Conn) {
 		// Read the incoming connection into the buffer.
 		l, err := conn.Read(buf)
 		if err != nil {
-			log.Printf("Network error: Error reading:", err.Error())
+			log.Fatal("Network error: Error reading:", err.Error())
 		}
 		n.decodeMessage(buf,l)
 	}
