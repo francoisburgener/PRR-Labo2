@@ -198,6 +198,8 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 		id = utils.ConverByteArrayToUint16(bytes[7:l])
 	}
 
+	log.Printf("Decoded message type:%s stamp:%d id:%d",_type,stamp,id)
+
 	switch _type {
 	case "REQ":
 		n.mutex.Req(stamp,id)
