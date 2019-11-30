@@ -113,6 +113,7 @@ func (n *Network) initAllConn() {
 func (n *Network)initConn(i int) {
 	addr := utils.AddressByID(uint16(i))
 	conn, err := net.Dial("tcp", addr)
+
 	if err != nil {
 		log.Printf("Connection refused with P%d",i)
 	}else{
@@ -132,6 +133,8 @@ func (n *Network) initServ(){
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	defer listener.Close()
 
 	for {
 
@@ -182,13 +185,13 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 	var id uint16
 	var value uint
 
-	if(_type == "UDP"){
+	if _type == "UDP"{
 		tmp, err := strconv.Atoi(string(bytes[3:l]))
 		if err != nil{
 			log.Fatal(err)
 		}
 		value = uint(tmp)
-	}else{
+	}else if _type == "OK_" || _type == "UPD"{
 		stamp = utils.ConverByteArrayToUint32(bytes[3:7])
 		id = utils.ConverByteArrayToUint16(bytes[7:l])
 	}
@@ -200,6 +203,8 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 		n.mutex.Ok(stamp,id)
 	case "UPD":
 		n.mutex.Update(value)
+	default:
+		log.Println("Incorrect type message !")
 	}
 }
 
