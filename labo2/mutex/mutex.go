@@ -158,10 +158,9 @@ func (m *Mutex) manager() {
 
 			// Network told us to update
 			case val := <- m.channels.updateChan:
-				log.Printf("Mutex: someone told us to update")
-				if m.private.state != CRITICAL {
-					m.resource = val
-				}
+				log.Printf("Mutex: someone wants to update %d -> %d", m.resource, val)
+				m.resource = val
+
 
 			// Client asked value
 			case <- m.channels.resourceChan:
