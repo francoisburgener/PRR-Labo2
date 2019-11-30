@@ -40,7 +40,11 @@ type Network struct {
 func (n *Network) REQ(stamp uint32, id uint16){
 	msg := utils.InitMessage(stamp,n.id,[]byte("REQ"))
 	buf := utils.ConvertMessageToBytes(msg);
-	n.directory[id].Write(buf)
+	_, err := n.directory[id].Write(buf)
+
+	if err != nil{
+		log.Fatal(err)
+	}
 }
 
 /**
@@ -51,7 +55,11 @@ func (n *Network) REQ(stamp uint32, id uint16){
 func (n *Network) OK(stamp uint32, id uint16){
 	msg := utils.InitMessage(stamp,n.id,[]byte("OK_"))
 	buf := utils.ConvertMessageToBytes(msg);
-	n.directory[id].Write(buf)
+	_, err := n.directory[id].Write(buf)
+
+	if err != nil{
+		log.Fatal(err)
+	}
 }
 
 /**
@@ -62,7 +70,10 @@ func (n *Network) OK(stamp uint32, id uint16){
 func (n *Network) UPDATE(value uint){
 	for i:=0; i < len(n.directory) + 1; i++{
 		if i != int(n.id){
-			n.directory[uint16(i)].Write([]byte("UPD" + strconv.Itoa(int(value))))
+			_, err := n.directory[uint16(i)].Write([]byte("UPD" + strconv.Itoa(int(value))))
+			if err != nil{
+				log.Fatal(err)
+			}
 		}
 	}
 }
@@ -118,8 +129,10 @@ func (n *Network)initConn(i uint16) {
 		log.Printf("Connection refused with P%d",i)
 	}else{
 		n.directory[uint16(i)] = conn
-		conn.Write([]byte(strconv.Itoa(int(n.id))))
-		//log.Println("Dial Connection between P" + strconv.Itoa(int(n.id)) + " and P" + strconv.Itoa(i))
+		_, err := conn.Write([]byte(strconv.Itoa(int(n.id))))
+		if err != nil{
+			log.Fatal(err)
+		}
 		log.Printf("Dial Connection between P%d and P%d\n", n.id, i)
 		go n.handleConn(conn)
 	}
