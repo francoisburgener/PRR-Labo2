@@ -25,6 +25,7 @@ type Network struct {
 	directory map[uint16]net.Conn // map of connection
 	Done chan string // channel to say if the server initialisation is done
 	mutex Mutex	//Ref of our mutex
+	Debug bool
 }
 
 /************************************************
@@ -44,7 +45,9 @@ func (n *Network) REQ(stamp uint32, id uint16){
 	if err != nil{
 		log.Fatal(err)
 	}
-	log.Printf("Network: Send message type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
+	if n.Debug{
+		log.Printf("Network: Send message type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
+	}
 
 }
 
@@ -61,7 +64,10 @@ func (n *Network) OK(stamp uint32, id uint16){
 	if err != nil{
 		log.Fatal(err)
 	}
-	log.Printf("Network: Send message type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
+
+	if n.Debug{
+		log.Printf("Network: Send message type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
+	}
 }
 
 /**
@@ -76,7 +82,10 @@ func (n *Network) UPDATE(value uint){
 			if err != nil{
 				log.Fatal(err)
 			}
-			log.Printf("Network: Send message Update P%d value: %d",i,value)
+
+			if n.Debug{
+				log.Printf("Network: Send message Update P%d value: %d",i,value)
+			}
 		}
 	}
 }
@@ -87,13 +96,14 @@ func (n *Network) UPDATE(value uint){
  * @param id of the processus
  * @param N number of processus
  */
-func (n *Network) Init(id uint16,N uint16, mutex Mutex) {
+func (n *Network) Init(id uint16,N uint16, mutex Mutex,debug bool) {
 	log.Printf("Network: Initialisation ")
 	n.directory = make(map[uint16]net.Conn,N)
 	n.Done = make(chan string)
 	n.mutex = mutex
 	n.id = id
 	n.nProc = N
+	n.Debug = debug
 
 	go func() {
 		n.initAllConn()
@@ -137,7 +147,10 @@ func (n *Network)initConn(i uint16) {
 		if err != nil{
 			log.Fatal(err)
 		}
-		log.Printf("Network : Dial Connection between P%d and P%d\n", n.id, i)
+
+		if n.Debug{
+			log.Printf("Network : Dial Connection between P%d and P%d\n", n.id, i)
+		}
 
 		go n.handleConn(conn)
 	}
@@ -193,10 +206,8 @@ func (n *Network)handleConn(conn net.Conn) {
 		// Read the incoming connection into the buffer.
 		l, err := conn.Read(buf)
 		if err != nil {
-			log.Printf("Error reading:", err.Error())
+			log.Printf("Network error: Error reading:", err.Error())
 		}
-
-		log.Printf("Receive message %s",buf)
 		n.decodeMessage(buf,l)
 	}
 }
@@ -219,20 +230,19 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 		id = utils.ConverByteArrayToUint16(bytes[7:l])
 	}
 
-	log.Printf("Network: Decoded message type:%s stamp:%d id:%d",_type,stamp,id)
+	if n.Debug{
+		log.Printf("Network: Decoded message type:%s stamp:%d id:%d",_type,stamp,id)
+	}
 
 	switch _type {
 	case "REQ":
-		log.Printf("Network: Call req method mutex")
 		n.mutex.Req(stamp,id)
 	case "OK_":
-		log.Printf("Network: Call ok method mutex")
 		n.mutex.Ok(stamp,id)
 	case "UPD":
-		log.Printf("Network: Call update method mutex")
 		n.mutex.Update(value)
 	default:
-		log.Println("Networkc: Incorrect type message !")
+		log.Println("Network: Incorrect type message !")
 	}
 }
 
