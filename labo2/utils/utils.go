@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"PRR-Labo2/labo2/message"
 	"encoding/binary"
 	"strconv"
 )
@@ -10,9 +9,6 @@ import (
 /************************************************
 *                UTILS METHODE       		    *
 *************************************************/
-func InitMessage(stamp uint32, id uint16, _type []byte) message.Message{
-	return message.Message{id, stamp, _type}
-}
 
 func uint32ToByteArray(i uint32) []byte{
 	buf := make([]byte, 4)
@@ -30,15 +26,15 @@ func uint16ToByteArray(i uint16) []byte{
  * Method to convert a Message type to an array of byte
  * @param message to convert
  */
-func ConvertMessageToBytes(msg message.Message) []byte{
+func InitMessage(stamp uint32,id uint16, _type []byte) []byte{
 	buf := []byte{}
 
-	id := uint16ToByteArray(msg.Id)
-	stamp := uint32ToByteArray(msg.Stamp)
+	_id := uint16ToByteArray(id)
+	_stamp := uint32ToByteArray(stamp)
 
-	buf = append(buf, msg.Type...)
-	buf = append(buf, stamp...)
-	buf = append(buf, id...)
+	buf = append(buf, _type...)
+	buf = append(buf, _stamp...)
+	buf = append(buf, _id...)
 	return buf
 }
 

@@ -39,14 +39,13 @@ type Network struct {
  */
 func (n *Network) REQ(stamp uint32, id uint16){
 	msg := utils.InitMessage(stamp,n.id,[]byte("REQ"))
-	buf := utils.ConvertMessageToBytes(msg)
-	_, err := n.directory[id].Write(buf)
+	_, err := n.directory[id].Write(msg)
 
 	if err != nil{
 		log.Fatal("Network error: Writing error:", err.Error())
 	}
 	if n.Debug{
-		log.Printf("Network: Send message type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
+		log.Printf("Network: Send message type:%s stamp:%d id:%d \n","REQ",stamp,id)
 	}
 
 }
@@ -58,15 +57,14 @@ func (n *Network) REQ(stamp uint32, id uint16){
  */
 func (n *Network) OK(stamp uint32, id uint16){
 	msg := utils.InitMessage(stamp,n.id,[]byte("OK_"))
-	buf := utils.ConvertMessageToBytes(msg);
-	_, err := n.directory[id].Write(buf)
+	_, err := n.directory[id].Write(msg)
 
 	if err != nil{
 		log.Fatal("Network error: Writing error:", err.Error())
 	}
 
 	if n.Debug{
-		log.Printf("Network: Send message type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
+		log.Printf("Network: Send message type:%s stamp:%d id:%d \n","OK_",stamp,id)
 	}
 }
 
