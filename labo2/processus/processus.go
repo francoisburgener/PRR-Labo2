@@ -27,5 +27,5 @@ func (p *Process) Init(id uint16, N uint16){
 	initStamp := uint32(rand.Intn(max - min + 1) + min)
 
 	p.Mut.Init(p.Id, initStamp, N, &p.Net)
-	p.Net.Init(p.Id, N, &p.Mut)
+	p.Net.Init(p.Id, N, &p.Mut,true)
 }
