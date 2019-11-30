@@ -14,12 +14,12 @@ import (
 func main(){
 	id,N := argValue()
 	p := processus.Processus{}
-	p.Init(uint16(id),N)
+	p.Init(id,N)
 	fmt.Println("\nInitialisation done\n")
-	console(&p, uint16(id))
+	console(&p)
 }
 
-func argValue() (uint16, int) {
+func argValue() (uint16, uint16) {
 	var proc string
 	var procN string
 	flag.StringVar(&proc, "proc", "", "Usage")
@@ -31,11 +31,11 @@ func argValue() (uint16, int) {
 		log.Fatal("Please put a number !")
 	}
 
-	return uint16(id),N
+	return uint16(id),uint16(N)
 
 }
 
-func console(p *processus.Processus,id uint16) {
+func console(p *processus.Processus) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Choice (number)")
 	fmt.Println("---------------------")
@@ -51,9 +51,14 @@ func console(p *processus.Processus,id uint16) {
 
 		switch choice {
 		case "1":
-			//TODO
+			// todo
 		case "2":
-			//TODO
+			p.Mut.Ask()
+			fmt.Println("Process is asking for the resource")
+			p.Mut.Wait()
+			fmt.Println("Other Processes gave us permission")
+			p.Mut.Update(42)
+			p.Mut.End()
 		case "3":
 			os.Exit(0)
 		default:

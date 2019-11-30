@@ -22,7 +22,7 @@ type Mutex interface {
 *************************************************/
 type Network struct {
 	id uint16 //id of our processus
-	nProc int // Number of processus
+	nProc uint16 // Number of processus
 	directory map[uint16]net.Conn // map of connection
 	Done chan string // channel to say if the server initialisation is done
 	mutex Mutex	//Ref of our mutex
@@ -73,10 +73,10 @@ func (n *Network) UPDATE(value uint){
  * @param id of the processus
  * @param N number of processus
  */
-func (n *Network) Init(id uint16,N int, mutex Mutex) {
+func (n *Network) Init(id uint16,N uint16, mutex Mutex) {
 	n.directory = make(map[uint16]net.Conn,N)
 	n.Done = make(chan string)
-	n.mutex = mutex;
+	n.mutex = mutex
 	n.id = id
 	n.nProc = N
 
@@ -97,8 +97,8 @@ func (n *Network) Init(id uint16,N int, mutex Mutex) {
  * @param N number of processus
  */
 func (n *Network) initAllConn() {
-	for i:=0 ; i < n.nProc; i++ {
-		if i != int(n.id) {
+	for i:=uint16(0) ; i < n.nProc; i++ {
+		if i != uint16(n.id) {
 			n.initConn(i)
 		}
 	}
@@ -110,7 +110,7 @@ func (n *Network) initAllConn() {
  * @param i id of the processus we want to connect
  * @param id of our processus
  */
-func (n *Network)initConn(i int) {
+func (n *Network)initConn(i uint16) {
 	addr := utils.AddressByID(uint16(i))
 	conn, err := net.Dial("tcp", addr)
 
@@ -119,7 +119,8 @@ func (n *Network)initConn(i int) {
 	}else{
 		n.directory[uint16(i)] = conn
 		conn.Write([]byte(strconv.Itoa(int(n.id))))
-		log.Println("Dial Connection between P" + strconv.Itoa(int(n.id)) + " and P" + strconv.Itoa(i))
+		//log.Println("Dial Connection between P" + strconv.Itoa(int(n.id)) + " and P" + strconv.Itoa(i))
+		log.Printf("Dial Connection between P%d and P%d\n", n.id, i)
 	}
 }
 
@@ -138,7 +139,7 @@ func (n *Network) initServ(){
 
 	for {
 
-		if len(n.directory) == n.nProc-1{
+		if len(n.directory) == int(n.nProc-1) {
 			n.Done <- "done"
 		}
 

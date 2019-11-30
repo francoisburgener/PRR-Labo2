@@ -70,10 +70,10 @@ type Mutex struct {
  * This method is responsible to initialize everything in order.
  * ALWAYS CALL IT BEFORE DOING ANYTHING ELSE
  */
-func (m *Mutex) Init(id uint16, initialStamp uint32, netWorker Network) {
+func (m *Mutex) Init(id uint16, initialStamp uint32, numberOfProcess uint16, netWorker Network) {
 
 	m.private = mutexPrivate{
-		N:         0, // Dead
+		N:         numberOfProcess,
 		me:        id,
 		stamp:     initialStamp,
 		state:     REST,
@@ -91,6 +91,9 @@ func (m *Mutex) Init(id uint16, initialStamp uint32, netWorker Network) {
 		askChan:     make(chan bool),
 		waitChan:    make(chan bool),
 	}
+
+	// We start with some tokens already
+	m.initpWait()
 
 	// Here the manager starts
 	go m.manager()
@@ -210,7 +213,7 @@ func (m *Mutex) Ok(stamp uint32, id uint16) {
 
 /**
  * SETTER: call this if you want to change the SC val
- * Never call if without being in SC (ask, wait, update, end)
+ * Never call it without being in SC (ask, wait, update, end)
  */
 func (m *Mutex) Update(value uint) {
 	m.channels.updateChan <- value
@@ -235,7 +238,7 @@ func (m *Mutex) okAll() {
  */
 func (m *Mutex) reqAll() {
 	for key, _ := range m.private.pWait  {
-		fmt.Printf("Sending req to %d", key)
+		fmt.Printf("Sending req to %d\n", key)
 		m.private.netWorker.REQ(m.private.stamp, key)
 	}
 }
@@ -250,4 +253,13 @@ func (m *Mutex) incrementClock(value uint32){
 	}
 
 	m.private.stamp += 1
+}
+
+/**
+ * Initialize the tokens this P has over the others
+ */
+func (m *Mutex) initpWait(){
+	for i := m.private.me + 1; i < m.private.N; i++ {
+		m.private.pWait[i] = true
+	}
 }
