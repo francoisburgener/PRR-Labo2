@@ -43,7 +43,7 @@ func (n *Network) REQ(stamp uint32, id uint16){
 	_, err := n.directory[id].Write(buf)
 
 	if err != nil{
-		log.Fatal(err)
+		log.Fatal("Network error: Writing error:", err.Error())
 	}
 	if n.Debug{
 		log.Printf("Network: Send message type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
@@ -62,7 +62,7 @@ func (n *Network) OK(stamp uint32, id uint16){
 	_, err := n.directory[id].Write(buf)
 
 	if err != nil{
-		log.Fatal(err)
+		log.Fatal("Network error: Writing error:", err.Error())
 	}
 
 	if n.Debug{
@@ -80,7 +80,7 @@ func (n *Network) UPDATE(value uint){
 		if i != int(n.id){
 			_, err := n.directory[uint16(i)].Write([]byte("UPD" + strconv.Itoa(int(value))))
 			if err != nil{
-				log.Fatal(err)
+				log.Fatal("Network error: Writing error:", err.Error())
 			}
 
 			if n.Debug{
@@ -144,7 +144,7 @@ func (n *Network)initConn(i uint16) {
 		n.directory[uint16(i)] = conn
 		_, err := conn.Write([]byte(strconv.Itoa(int(n.id))))
 		if err != nil{
-			log.Fatal(err)
+			log.Fatal("Network error: Writing error:", err.Error())
 		}
 
 		if n.Debug{
@@ -163,7 +163,7 @@ func (n *Network) initServ(){
 	addr := utils.AddressByID(n.id)
 	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("Network error: Listen error:", err.Error())
 	}
 
 	defer listener.Close()
@@ -176,7 +176,7 @@ func (n *Network) initServ(){
 
 		conn, err := listener.Accept()
 		if err != nil {
-			log.Print(err)
+			log.Fatal("Network error: Listen accept error:", err.Error())
 		}
 
 
@@ -221,7 +221,7 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 	if _type == "UPD"{
 		tmp, err := strconv.Atoi(string(bytes[3:l]))
 		if err != nil{
-			log.Fatal(err)
+			log.Fatal("Network error: Convert string to int:", err.Error())
 		}
 		value = uint(tmp)
 
