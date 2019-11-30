@@ -193,7 +193,7 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 			log.Fatal(err)
 		}
 		value = uint(tmp)
-	}else if _type == "OK_" || _type == "UPD"{
+	}else if _type == "OK_" || _type == "REQ"{
 		stamp = utils.ConverByteArrayToUint32(bytes[3:7])
 		id = utils.ConverByteArrayToUint16(bytes[7:l])
 	}
