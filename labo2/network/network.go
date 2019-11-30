@@ -73,6 +73,7 @@ func (n *Network) UPDATE(value uint){
 			if err != nil{
 				log.Fatal(err)
 			}
+			log.Printf("Network: Update P%d value: %d",i,value)
 		}
 	}
 }
@@ -125,7 +126,7 @@ func (n *Network)initConn(i uint16) {
 	conn, err := net.Dial("tcp", addr)
 
 	if err != nil {
-		log.Printf("Connection refused with P%d",i)
+		log.Printf("Network error : Connection refused with P%d",i)
 	}else{
 		n.directory[uint16(i)] = conn
 		_, err := conn.Write([]byte(strconv.Itoa(int(n.id))))
@@ -133,6 +134,7 @@ func (n *Network)initConn(i uint16) {
 			log.Fatal(err)
 		}
 		log.Printf("Network : Dial Connection between P%d and P%d\n", n.id, i)
+
 		go n.handleConn(conn)
 	}
 }
@@ -214,13 +216,16 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 
 	switch _type {
 	case "REQ":
+		log.Printf("Network: Call req method mutex")
 		n.mutex.Req(stamp,id)
 	case "OK_":
+		log.Printf("Network: Call ok method mutex")
 		n.mutex.Ok(stamp,id)
 	case "UPD":
+		log.Printf("Network: Call update method mutex")
 		n.mutex.Update(value)
 	default:
-		log.Println("Incorrect type message !")
+		log.Println("Network: Incorrect type message !")
 	}
 }
 
