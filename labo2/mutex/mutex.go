@@ -94,6 +94,8 @@ func (m *Mutex) Init(id uint16, initialStamp uint32, numberOfProcess uint16, net
 		resourceChan: make(chan uint),
 	}
 
+	m.resource = 1000
+
 	// We start with some tokens already
 	m.initpWait()
 
