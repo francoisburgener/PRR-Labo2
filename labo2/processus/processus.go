@@ -17,7 +17,9 @@ func (p *Process) Init(id uint16, N uint16){
 	p.Id = id
 	p.N = N
 	p.Net = network.Network{}
-	p.Mut = mutex.Mutex{}
+	p.Mut = mutex.Mutex{
+		Debug: true,
+	}
 
 	const max = 100
 	const min = 1

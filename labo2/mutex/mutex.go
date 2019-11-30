@@ -64,6 +64,7 @@ type Mutex struct {
 	private  mutexPrivate
 	channels mutexChans
 	resource uint
+	Debug bool
 }
 
 /**
@@ -113,7 +114,9 @@ func (m *Mutex) manager() {
 		select {
 			// ASK: Client called Ask()
 			case <- m.channels.askChan:
-				log.Printf("Mutex: Client asked me the CS")
+				if m.Debug {
+					log.Printf("Mutex: Client asked me the CS")
+				}
 
 				if m.private.state == REST {
 					m.incrementClock(0)
@@ -124,7 +127,10 @@ func (m *Mutex) manager() {
 
 			// END: Client released SC
 			case <- m.channels.endChan:
-				log.Printf("Mutex: Client released the CS")
+				if m.Debug {
+					log.Printf("Mutex: Client released the CS")
+				}
+
 				m.incrementClock(0)
 				m.private.state = REST		// Leaving SC
 				m.private.netWorker.UPDATE(m.resource)
@@ -133,7 +139,10 @@ func (m *Mutex) manager() {
 
 			// P asked a token
 			case message := <- m.channels.reqChan:
-				log.Printf("Mutex: Req received from %d", message.id)
+				if m.Debug {
+					log.Printf("Mutex: Req received from %d", message.id)
+				}
+
 				m.incrementClock(message.stamp) // Increment, max between mine and P
 
 				if m.private.state == CRITICAL ||
@@ -154,15 +163,19 @@ func (m *Mutex) manager() {
 
 			// P sent Ok
 			case message:= <- m.channels.okChan:
-				log.Printf("Mutex: Ok received from %d", message.id)
+				if m.Debug {
+					log.Printf("Mutex: Ok received from %d", message.id)
+				}
+
 				m.incrementClock(message.stamp) // Increment, max between mine and P
 				delete(m.private.pWait, message.id) // removing wait from here
 
 			// Network told us to update
 			case val := <- m.channels.updateChan:
-				log.Printf("Mutex: someone wants to update %d -> %d", m.resource, val)
+				if m.Debug {
+					log.Printf("Mutex: someone wants to update %d -> %d", m.resource, val)
+				}
 				m.resource = val
-
 
 			// Client asked value
 			case <- m.channels.resourceChan:
