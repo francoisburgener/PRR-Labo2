@@ -225,14 +225,21 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 			log.Fatal(err)
 		}
 		value = uint(tmp)
+
+		if n.Debug{
+			log.Printf("Network: Decoded message type:%s value:%d",_type,value)
+		}
+
 	}else if _type == "OK_" || _type == "REQ"{
 		stamp = utils.ConverByteArrayToUint32(bytes[3:7])
 		id = utils.ConverByteArrayToUint16(bytes[7:l])
+
+		if n.Debug{
+			log.Printf("Network: Decoded message type:%s stamp:%d id:%d",_type,stamp,id)
+		}
+
 	}
 
-	if n.Debug{
-		log.Printf("Network: Decoded message type:%s stamp:%d id:%d",_type,stamp,id)
-	}
 
 	switch _type {
 	case "REQ":
