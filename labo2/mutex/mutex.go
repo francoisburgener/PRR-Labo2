@@ -104,93 +104,6 @@ func (m *Mutex) Init(id uint16, initialStamp uint32, numberOfProcess uint16, net
 	go m.manager()
 }
 
-/**
- * This function runs in a goroutine
- * It is the main handler of the mutex
- * Every method called passes through here
- */
-func (m *Mutex) manager() {
-	for {
-		select {
-			// ASK: Client called Ask()
-			case <- m.channels.askChan:
-				if m.Debug {
-					log.Printf("Mutex %d: Client asked me the CS", m.private.stamp)
-				}
-
-				if m.private.state == REST {
-					m.incrementClock(0)
-					m.private.state = WAITING
-					m.private.stampAsk = m.private.stamp
-					m.reqAll() // Sending req to the Ps to ask token
-				}
-
-			// END: Client released SC
-			case <- m.channels.endChan:
-				if m.Debug {
-					log.Printf("Mutex %d: Client released the CS", m.private.stamp)
-				}
-
-				m.incrementClock(0)
-				m.private.state = REST		// Leaving SC
-				m.private.netWorker.UPDATE(m.resource)
-				m.okAll() // Sending ok to the differed Ps
-
-
-			// P asked a token
-			case message := <- m.channels.reqChan:
-				if m.Debug {
-					log.Printf("Mutex %d: Req received from %d", m.private.stamp, message.id)
-				}
-
-				m.incrementClock(message.stamp) // Increment, max between mine and P
-
-				if m.private.state == CRITICAL ||
-					m.private.state == WAITING &&
-					m.private.stampAsk < message.stamp ||
-					(m.private.stampAsk == message.stamp && m.private.me < message.id) {
-
-					m.private.pDiff[message.id] = true // We have to differ the obtain from other P
-				} else {
-
-					m.private.pWait[message.id] = true // Adding to waiting set
-					m.private.netWorker.OK(m.private.stamp, message.id) //Sending the signal
-				}
-
-				for key, _ := range m.private.pWait  {
-					log.Printf("Mutex: Waiting on him %d\n", key)
-				}
-
-			// P sent Ok
-			case message:= <- m.channels.okChan:
-				if m.Debug {
-					log.Printf("Mutex %d: Ok received from %d", m.private.stamp, message.id)
-				}
-
-				m.incrementClock(message.stamp) // Increment, max between mine and P
-				delete(m.private.pWait, message.id) // removing wait from here
-
-			// Network told us to update
-			case val := <- m.channels.updateChan:
-				if m.Debug {
-					log.Printf("Mutex %d: someone wants to update %d -> %d", m.private.stamp, m.resource, val)
-				}
-				m.resource = val
-
-			// Client asked value
-			case <- m.channels.resourceChan:
-				m.channels.resourceChan <- m.resource
-
-			default:
-				// If we need to enter CS and don't wait on anyone
-				if m.private.state == WAITING && len(m.private.pWait) == 0 {
-					m.private.state = CRITICAL
-					m.channels.waitChan <- true // we release our client
-				}
-		}
-	}
-}
-
 // CLIENT SIDE METHODS --------------------------------
 
 /**
@@ -254,7 +167,129 @@ func (m *Mutex) Update(value uint) {
 	m.channels.updateChan <- value
 }
 
-// PRIVATE utils methods ---------------------------------
+// PRIVATE methods ---------------------------------
+
+/**
+ * This function runs in a goroutine
+ * It is the main handler of the mutex
+ * Every method called passes through here
+ */
+func (m *Mutex) manager() {
+	for {
+		select {
+		// ASK: Client called Ask()
+		case <- m.channels.askChan:
+			m.handleAsk()
+
+		// END: Client released SC
+		case <- m.channels.endChan:
+			m.handleEnd()
+
+		// P asked a token
+		case message := <- m.channels.reqChan:
+			m.handleReq(message)
+
+		// P sent Ok
+		case message:= <- m.channels.okChan:
+			m.handleOk(message)
+
+		// Network told us to update, SETTER
+		case val := <- m.channels.updateChan:
+			m.handleUpdate(val)
+
+		// Client asked value, GETTER
+		case <- m.channels.resourceChan:
+			m.channels.resourceChan <- m.resource
+
+		default:
+			// If we need to enter CS and don't wait on anyone
+			if m.private.state == WAITING && len(m.private.pWait) == 0 {
+				m.private.state = CRITICAL
+				m.channels.waitChan <- true // we release our client
+			}
+		}
+	}
+}
+
+/**
+ * Prepare the requests to other P
+ */
+func (m *Mutex) handleAsk() {
+	if m.private.state == REST {
+		m.incrementClock(0)
+		m.private.state = WAITING
+		m.private.stampAsk = m.private.stamp
+		m.reqAll() // Sending req to the Ps to ask token
+	}
+
+	if m.Debug {
+		log.Printf("Mutex %d: Client asked me the CS", m.private.stamp)
+	}
+}
+
+/**
+ * Releases the CS and sends Ok to differed P
+ */
+func (m *Mutex) handleEnd() {
+	m.incrementClock(0)
+	m.private.state = REST		// Leaving SC
+	m.private.netWorker.UPDATE(m.resource)
+	m.okAll() // Sending ok to the differed Ps
+
+	if m.Debug {
+		log.Printf("Mutex %d: Client released the CS", m.private.stamp)
+	}
+}
+
+/**
+ * Handles incoming requests from other P
+ */
+func (m *Mutex) handleReq(message Message) {
+	m.incrementClock(message.stamp) // Increment, max between mine and P
+
+	if m.private.state == CRITICAL ||
+		m.private.state == WAITING &&
+			m.private.stampAsk < message.stamp ||
+		(m.private.stampAsk == message.stamp && m.private.me < message.id) {
+
+		m.private.pDiff[message.id] = true // We have to differ the obtain from other P
+	} else {
+
+		m.private.pWait[message.id] = true // Adding to waiting set
+		m.private.netWorker.OK(m.private.stamp, message.id) //Sending the signal
+	}
+
+	if m.Debug {
+		log.Printf("Mutex %d: Req received from %d", m.private.stamp, message.id)
+
+		for key, _ := range m.private.pWait  {
+			log.Printf("Mutex: Waiting on him %d\n", key)
+		}
+	}
+}
+
+/**
+ * Handles incoming Ok from other P
+ */
+func (m *Mutex) handleOk(message Message) {
+	m.incrementClock(message.stamp) // Increment, max between mine and P
+	delete(m.private.pWait, message.id) // removing wait from here
+
+	if m.Debug {
+		log.Printf("Mutex %d: Ok received from %d", m.private.stamp, message.id)
+	}
+}
+
+/**
+ * Handles incoming update (local or distant)
+ */
+func (m *Mutex) handleUpdate(val uint) {
+	m.resource = val
+
+	if m.Debug {
+		log.Printf("Mutex %d: someone wants to update %d -> %d", m.private.stamp, m.resource, val)
+	}
+}
 
 /**
  * Sends ok to all differed P in network
@@ -275,7 +310,6 @@ func (m *Mutex) okAll() {
  */
 func (m *Mutex) reqAll() {
 	for key, _ := range m.private.pWait  {
-		log.Printf("Mutex: Sending req to %d\n", key)
 		m.private.netWorker.REQ(m.private.stamp, key)
 	}
 }

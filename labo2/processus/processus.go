@@ -20,7 +20,7 @@ func (p *Process) Init(id uint16, N uint16){
 		Debug: false,
 	}
 	p.Mut = mutex.Mutex{
-		Debug: true,
+		Debug: false,
 	}
 
 	const max = 100
