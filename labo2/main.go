@@ -57,7 +57,7 @@ func console(p *processus.Process) {
 			log.Println("Client: Process is asking for the resource")
 			p.Mut.Wait()
 			log.Println("Client: Other Processes gave us permission")
-			p.Mut.Update(42)
+			p.Mut.Update(uint(p.Id))
 			p.Mut.End()
 		case "3":
 			os.Exit(0)
