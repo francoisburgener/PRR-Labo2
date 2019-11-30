@@ -96,14 +96,13 @@ func (n *Network) UPDATE(value uint){
  * @param id of the processus
  * @param N number of processus
  */
-func (n *Network) Init(id uint16,N uint16, mutex Mutex,debug bool) {
+func (n *Network) Init(id uint16,N uint16, mutex Mutex) {
 	log.Printf("Network: Initialisation ")
 	n.directory = make(map[uint16]net.Conn,N)
 	n.Done = make(chan string)
 	n.mutex = mutex
 	n.id = id
 	n.nProc = N
-	n.Debug = debug
 
 	go func() {
 		n.initAllConn()

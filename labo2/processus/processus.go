@@ -16,7 +16,9 @@ type Process struct{
 func (p *Process) Init(id uint16, N uint16){
 	p.Id = id
 	p.N = N
-	p.Net = network.Network{}
+	p.Net = network.Network{
+		Debug: false,
+	}
 	p.Mut = mutex.Mutex{
 		Debug: true,
 	}
@@ -27,5 +29,5 @@ func (p *Process) Init(id uint16, N uint16){
 	initStamp := uint32(rand.Intn(max - min + 1) + min)
 
 	p.Mut.Init(p.Id, initStamp, N, &p.Net)
-	p.Net.Init(p.Id, N, &p.Mut,true)
+	p.Net.Init(p.Id, N, &p.Mut)
 }
