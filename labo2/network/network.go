@@ -176,10 +176,14 @@ func (n *Network) initServ(){
 		tmp := make([]byte,128)
 		l, err := conn.Read(tmp)
 		if err != nil {
-			log.Print(err)
+			log.Fatal("Network error: Reading error:", err.Error())
 		}
 		str := string(tmp[0:l])
 		idConn, err := strconv.Atoi(str)
+		if err != nil {
+			log.Fatal("Network error: Cannot take the id of the processus:", err.Error())
+		}
+
 		log.Println("Network: Serv Connection between P" + strconv.Itoa(int(n.id)) + " and P" + strconv.Itoa(idConn))
 		n.directory[uint16(idConn)] = conn
 
@@ -214,7 +218,7 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 	if _type == "UPD"{
 		tmp, err := strconv.Atoi(string(bytes[3:l]))
 		if err != nil{
-			log.Fatal("Network error: Convert string to int:", err.Error())
+			log.Fatal("Network error: Update message without value:", err.Error())
 		}
 		value = uint(tmp)
 
