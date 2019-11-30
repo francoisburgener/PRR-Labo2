@@ -54,9 +54,9 @@ func console(p *processus.Processus) {
 			// todo
 		case "2":
 			p.Mut.Ask()
-			fmt.Println("Process is asking for the resource")
+			fmt.Println("Client: Process is asking for the resource")
 			p.Mut.Wait()
-			fmt.Println("Other Processes gave us permission")
+			fmt.Println("Client: Other Processes gave us permission")
 			p.Mut.Update(42)
 			p.Mut.End()
 		case "3":
