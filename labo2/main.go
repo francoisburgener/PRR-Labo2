@@ -75,7 +75,7 @@ func console(p *processus.Process) {
 
 			fmt.Println(" value is", b)
 
-			p.Mut.Update(uint(b))
+			p.Mut.Update(uint32(b))
 			p.Mut.End()
 		case "3":
 			os.Exit(0)

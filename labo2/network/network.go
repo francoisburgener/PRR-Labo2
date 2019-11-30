@@ -22,7 +22,7 @@ const(
 type Mutex interface {
 	Req(stamp uint32, id uint16)
 	Ok(stamp uint32, id uint16)
-	Update(value uint)
+	Update(value uint32)
 }
 
 /************************************************
@@ -84,10 +84,10 @@ func (n *Network) OK(stamp uint32, id uint16){
  * Method of Network to send a messageUPDATE message
  * @param value to update
  */
-func (n *Network) UPDATE(value uint){
+func (n *Network) UPDATE(value uint32){
 	for i:=0; i < len(n.directory) + 1; i++{
 		if i != int(n.id){
-			msg := []byte(messageUPDATE + strconv.Itoa(int(value)))
+			msg := utils.InitMessageUpdate(value,[]byte(messageUPDATE))
 			mustCopy(n.directory[uint16(i)], bytes.NewReader(msg))
 			/*_, err := n.directory[uint16(i)].Write([]byte(messageUPDATE + strconv.Itoa(int(value))))
 			if err != nil{
@@ -227,16 +227,18 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 	_type := string(bytes[0:3])
 	var stamp uint32
 	var id uint16
-	var value uint
+	var value uint32
 
 	fmt.Println(bytes, "len", l)
 
 	if _type == messageUPDATE {
-		tmp, err := strconv.Atoi(string(bytes[3:l]))
+		value := utils.ConverByteArrayToUint32(bytes[3:l])
+
+		/*tmp, err := strconv.Atoi(string(bytes[3:l]))
 		if err != nil{
 			log.Fatal("Network error: Update message without value:", err.Error())
 		}
-		value = uint(tmp)
+		value = uint(tmp)*/
 
 		if n.Debug{
 			log.Printf("Network: Decoded message type:%s value:%d",_type,value)

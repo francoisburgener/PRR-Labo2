@@ -38,6 +38,16 @@ func InitMessage(stamp uint32,id uint16, _type []byte) []byte{
 	return buf
 }
 
+func InitMessageUpdate(value uint32, _type []byte) []byte{
+	var buf []byte
+
+	_value := uint32ToByteArray(value)
+
+	buf = append(buf, _type...)
+	buf = append(buf, _value...)
+	return buf
+}
+
 func ConverByteArrayToUint32(buf []byte) uint32{
 	return binary.LittleEndian.Uint32(buf)
 }
