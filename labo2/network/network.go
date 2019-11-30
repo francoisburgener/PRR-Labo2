@@ -38,7 +38,7 @@ type Network struct {
  * @param id of the processus
  */
 func (n *Network) REQ(stamp uint32, id uint16){
-	msg := utils.InitMessage(stamp,id,[]byte("REQ"))
+	msg := utils.InitMessage(stamp,n.id,[]byte("REQ"))
 	buf := utils.ConvertMessageToBytes(msg);
 	n.directory[id].Write(buf)
 }
@@ -49,7 +49,7 @@ func (n *Network) REQ(stamp uint32, id uint16){
  * @param id of the processus
  */
 func (n *Network) OK(stamp uint32, id uint16){
-	msg := utils.InitMessage(stamp,id,[]byte("OK_"))
+	msg := utils.InitMessage(stamp,n.id,[]byte("OK_"))
 	buf := utils.ConvertMessageToBytes(msg);
 	n.directory[id].Write(buf)
 }
