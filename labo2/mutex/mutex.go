@@ -1,7 +1,7 @@
 package mutex
 
 import (
-	"fmt"
+	"log"
 )
 
 /**
@@ -127,7 +127,7 @@ func (m *Mutex) manager() {
 
 			// P asked a token
 			case message := <- m.channels.reqChan:
-				fmt.Printf("Req received from %d", message.id)
+				log.Printf("Req received from %d", message.id)
 				m.incrementClock(message.stamp) // Increment, max between mine and P
 
 				if m.private.state == CRITICAL ||
@@ -144,7 +144,7 @@ func (m *Mutex) manager() {
 
 			// P sent Ok
 			case message:= <- m.channels.okChan:
-				fmt.Printf("Ok received from %d", message.id)
+				log.Printf("Ok received from %d", message.id)
 				m.incrementClock(message.stamp) // Increment, max between mine and P
 				delete(m.private.pWait, message.id) // removing wait from here
 
@@ -238,7 +238,7 @@ func (m *Mutex) okAll() {
  */
 func (m *Mutex) reqAll() {
 	for key, _ := range m.private.pWait  {
-		fmt.Printf("Sending req to %d\n", key)
+		log.Printf("Sending req to %d\n", key)
 		m.private.netWorker.REQ(m.private.stamp, key)
 	}
 }
