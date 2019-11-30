@@ -44,6 +44,8 @@ func (n *Network) REQ(stamp uint32, id uint16){
 	if err != nil{
 		log.Fatal(err)
 	}
+	log.Printf("Network: type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
+
 }
 
 /**
@@ -59,6 +61,7 @@ func (n *Network) OK(stamp uint32, id uint16){
 	if err != nil{
 		log.Fatal(err)
 	}
+	log.Printf("Network: type:%s stamp:%d id:%d \n",msg.Type,msg.Stamp,msg.Id)
 }
 
 /**
@@ -85,6 +88,7 @@ func (n *Network) UPDATE(value uint){
  * @param N number of processus
  */
 func (n *Network) Init(id uint16,N uint16, mutex Mutex) {
+	log.Printf("Network: Initialisation ")
 	n.directory = make(map[uint16]net.Conn,N)
 	n.Done = make(chan string)
 	n.mutex = mutex
@@ -225,7 +229,7 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 		log.Printf("Network: Call update method mutex")
 		n.mutex.Update(value)
 	default:
-		log.Println("Network: Incorrect type message !")
+		log.Println("Networkc: Incorrect type message !")
 	}
 }
 
