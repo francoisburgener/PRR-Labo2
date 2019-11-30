@@ -21,11 +21,11 @@ type Mutex interface {
 *                   STRUCTURE       		    *
 *************************************************/
 type Network struct {
-	id uint16
-	nProc int
-	directory map[uint16]net.Conn
-	Done chan string
-	mutex Mutex
+	id uint16 //id of our processus
+	nProc int // Number of processus
+	directory map[uint16]net.Conn // map of connection
+	Done chan string // channel to say if the server initialisation is done
+	mutex Mutex	//Ref of our mutex
 }
 
 /************************************************
@@ -69,40 +69,26 @@ func (n *Network) UPDATE(value uint){
 
 
 /**
- * Method to init a new Network
+ * Method to init the server and get all connection between processus
+ * @param id of the processus
+ * @param N number of processus
  */
-func (n *Network) initServ(){
-	addr := utils.AddressByID(n.id)
-	listener, err := net.Listen("tcp", addr)
-	if err != nil {
-		log.Fatal(err)
-	}
+func (n *Network) Init(id uint16,N int, mutex Mutex) {
+	n.directory = make(map[uint16]net.Conn,N)
+	n.Done = make(chan string)
+	n.mutex = mutex;
+	n.id = id
+	n.nProc = N
 
-	for {
+	go func() {
+		n.initAllConn()
+		n.initServ()
+	}()
 
-		if len(n.directory) == n.nProc-1{
-			n.Done <- "done"
-		}
-
-		conn, err := listener.Accept()
-		if err != nil {
-			log.Print(err)
-		}
-
-
-		tmp := make([]byte,128)
-		l, err := conn.Read(tmp)
-		if err != nil {
-			log.Print(err)
-		}
-		str := string(tmp[0:l])
-		idConn, err := strconv.Atoi(str)
-		log.Println("Serv Connection between P" + strconv.Itoa(int(n.id)) + " and P" + strconv.Itoa(idConn))
-		n.directory[uint16(idConn)] = conn
-
-		go n.handleConn(conn)
-	}
+	<- n.Done
 }
+
+// PRIVATE methods ---------------------------------
 
 /**
  * Method to init all dial connection
@@ -136,25 +122,41 @@ func (n *Network)initConn(i int) {
 	}
 }
 
+
 /**
- * Method to init the server and get all connection between processus
- * @param id of the processus
- * @param N number of processus
+ * Method to init a new Network
  */
-func (n *Network) Init(id uint16,N int, mutex Mutex) {
-	n.directory = make(map[uint16]net.Conn,N)
-	n.Done = make(chan string)
-	n.mutex = mutex;
-	n.id = id
-	n.nProc = N
+func (n *Network) initServ(){
+	addr := utils.AddressByID(n.id)
+	listener, err := net.Listen("tcp", addr)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	go func() {
-		n.initAllConn()
-		n.initServ()
-	}()
+	for {
 
-	<- n.Done
+		if len(n.directory) == n.nProc-1{
+			n.Done <- "done"
+		}
 
+		conn, err := listener.Accept()
+		if err != nil {
+			log.Print(err)
+		}
+
+
+		tmp := make([]byte,128)
+		l, err := conn.Read(tmp)
+		if err != nil {
+			log.Print(err)
+		}
+		str := string(tmp[0:l])
+		idConn, err := strconv.Atoi(str)
+		log.Println("Serv Connection between P" + strconv.Itoa(int(n.id)) + " and P" + strconv.Itoa(idConn))
+		n.directory[uint16(idConn)] = conn
+
+		go n.handleConn(conn)
+	}
 }
 
 /**
