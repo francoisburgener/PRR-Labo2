@@ -38,7 +38,7 @@ type Network struct {
  */
 func (n *Network) REQ(stamp uint32, id uint16){
 	msg := utils.InitMessage(stamp,n.id,[]byte("REQ"))
-	buf := utils.ConvertMessageToBytes(msg);
+	buf := utils.ConvertMessageToBytes(msg)
 	_, err := n.directory[id].Write(buf)
 
 	if err != nil{

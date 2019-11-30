@@ -38,6 +38,9 @@ func console(p *processus.Process) {
 	reader := bufio.NewReader(os.Stdin)
 	log.Println("Client: Choice (number)")
 	log.Println("Client: ---------------------")
+
+	test := uint16(1)
+
 	for{
 		log.Println("Client: 1 - Read critical value")
 		log.Println("Client: 2 - Update critical value")
@@ -57,13 +60,15 @@ func console(p *processus.Process) {
 			log.Println("Client: Process is asking for the resource")
 			p.Mut.Wait()
 			log.Println("Client: Other Processes gave us permission")
-			p.Mut.Update(uint(p.Id))
+			p.Mut.Update(uint(test * p.Id))
 			p.Mut.End()
 		case "3":
 			os.Exit(0)
 		default:
 			log.Println("Client: Choose 1 or 2")
 		}
+
+		test++
 	}
 
 }
