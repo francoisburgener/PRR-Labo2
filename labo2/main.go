@@ -13,7 +13,7 @@ import (
 
 func main(){
 	id,N := argValue()
-	p := processus.Processus{}
+	p := processus.Process{}
 	p.Init(id,N)
 	fmt.Println("\nInitialisation done\n")
 	console(&p)
@@ -35,7 +35,7 @@ func argValue() (uint16, uint16) {
 
 }
 
-func console(p *processus.Processus) {
+func console(p *processus.Process) {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Choice (number)")
 	fmt.Println("---------------------")
@@ -51,7 +51,8 @@ func console(p *processus.Processus) {
 
 		switch choice {
 		case "1":
-			// todo
+			a := p.Mut.GetResource()
+			fmt.Printf("Client: The resource is %d \n", a)
 		case "2":
 			p.Mut.Ask()
 			fmt.Println("Client: Process is asking for the resource")

@@ -48,12 +48,13 @@ type mutexPrivate struct {
  * Hides the communication channels used by the mutex
  */
 type mutexChans struct {
-	reqChan chan Message
-	okChan chan Message
-	endChan chan bool
-	updateChan chan uint
-	askChan chan bool
-	waitChan chan bool
+	reqChan      chan Message
+	okChan       chan Message
+	endChan      chan bool
+	updateChan   chan uint
+	askChan      chan bool
+	waitChan     chan bool
+	resourceChan chan uint
 }
 
 /**
@@ -84,12 +85,13 @@ func (m *Mutex) Init(id uint16, initialStamp uint32, numberOfProcess uint16, net
 	}
 
 	m.channels = mutexChans{
-		reqChan:    make(chan Message),
-		okChan:     make(chan Message),
-		endChan:    make(chan bool),
-		updateChan: make(chan uint),
-		askChan:     make(chan bool),
-		waitChan:    make(chan bool),
+		reqChan:      make(chan Message),
+		okChan:       make(chan Message),
+		endChan:      make(chan bool),
+		updateChan:   make(chan uint),
+		askChan:      make(chan bool),
+		waitChan:     make(chan bool),
+		resourceChan: make(chan uint),
 	}
 
 	// We start with some tokens already
@@ -152,10 +154,14 @@ func (m *Mutex) manager() {
 
 			// Network told us to update
 			case val := <- m.channels.updateChan:
-				log.Printf("Mutex: Network told us to update")
+				log.Printf("Mutex: someone told us to update")
 				if m.private.state != CRITICAL {
 					m.resource = val
 				}
+
+			// Client asked value
+			case <- m.channels.resourceChan:
+				m.channels.resourceChan <- m.resource
 
 			default:
 				// If we need to enter CS and don't wait on anyone
@@ -212,6 +218,14 @@ func (m *Mutex) Ok(stamp uint32, id uint16) {
 		id:    id,
 	}
 	m.channels.okChan <- message
+}
+
+/**
+ * GETTER
+ */
+func (m *Mutex) GetResource() uint {
+	m.channels.resourceChan <- 0
+	return <-m.channels.resourceChan
 }
 
 /**
