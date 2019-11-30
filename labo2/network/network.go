@@ -2,7 +2,9 @@ package network
 
 import (
 	"PRR-Labo2/labo2/utils"
+	"bytes"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"strconv"
@@ -46,11 +48,13 @@ type Network struct {
  */
 func (n *Network) REQ(stamp uint32, id uint16){
 	msg := utils.InitMessage(stamp,n.id,[]byte(messageREQ))
-	_, err := n.directory[id].Write(msg)
+	//_, err := n.directory[id].Write(msg)
+	mustCopy(n.directory[id], bytes.NewReader(msg))
 
-	if err != nil{
+	/*if err != nil{
 		log.Fatal("Network error: Writing error:", err.Error())
-	}
+	}*/
+
 	if n.Debug{
 		log.Printf("Network: Send message type:%s stamp:%d id:%d \n", messageREQ,stamp,id)
 	}
@@ -64,11 +68,12 @@ func (n *Network) REQ(stamp uint32, id uint16){
  */
 func (n *Network) OK(stamp uint32, id uint16){
 	msg := utils.InitMessage(stamp,n.id,[]byte(messageOK))
-	_, err := n.directory[id].Write(msg)
+	/*_, err := n.directory[id].Write(msg)
 
 	if err != nil{
 		log.Fatal("Network error: Writing error:", err.Error())
-	}
+	}*/
+	mustCopy(n.directory[id], bytes.NewReader(msg))
 
 	if n.Debug{
 		log.Printf("Network: Send message type:%s stamp:%d id:%d \n", messageOK,stamp,id)
@@ -82,10 +87,11 @@ func (n *Network) OK(stamp uint32, id uint16){
 func (n *Network) UPDATE(value uint){
 	for i:=0; i < len(n.directory) + 1; i++{
 		if i != int(n.id){
-			_, err := n.directory[uint16(i)].Write([]byte(messageUPDATE + strconv.Itoa(int(value))))
+			mustCopy(n.directory[uint16(i)], bytes.NewReader([]byte(messageUPDATE + strconv.Itoa(int(value)))))
+			/*_, err := n.directory[uint16(i)].Write([]byte(messageUPDATE + strconv.Itoa(int(value))))
 			if err != nil{
 				log.Fatal("Network error: Writing error:", err.Error())
-			}
+			}*/
 
 			if n.Debug{
 				log.Printf("Network: Send message Update P%d value: %d",i,value)
@@ -255,6 +261,12 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 		n.mutex.Update(value)
 	default:
 		log.Println("Network: Incorrect type message !")
+	}
+}
+
+func mustCopy(dst io.Writer, src io.Reader) {
+	if _, err := io.Copy(dst, src); err != nil {
+		log.Fatal(err)
 	}
 }
 
