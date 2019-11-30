@@ -146,6 +146,10 @@ func (m *Mutex) manager() {
 					m.private.netWorker.OK(m.private.stamp, message.id) //Sending the signal
 				}
 
+				for key, _ := range m.private.pWait  {
+					log.Printf("Mutex: Waiting on him %d\n", key)
+				}
+
 			// P sent Ok
 			case message:= <- m.channels.okChan:
 				log.Printf("Mutex: Ok received from %d", message.id)
