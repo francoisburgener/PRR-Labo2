@@ -62,7 +62,7 @@ func (n *Network) OK(stamp uint32, id uint16){
 func (n *Network) UPDATE(value uint){
 	for i:=0; i < len(n.directory) + 1; i++{
 		if i != int(n.id){
-			n.directory[uint16(i)].Write([]byte("UDP" + strconv.Itoa(int(value))))
+			n.directory[uint16(i)].Write([]byte("UPD" + strconv.Itoa(int(value))))
 		}
 	}
 }
@@ -187,7 +187,7 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 	var id uint16
 	var value uint
 
-	if _type == "UDP"{
+	if _type == "UPD"{
 		tmp, err := strconv.Atoi(string(bytes[3:l]))
 		if err != nil{
 			log.Fatal(err)
