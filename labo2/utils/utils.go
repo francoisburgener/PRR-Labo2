@@ -35,6 +35,7 @@ func InitMessage(stamp uint32,id uint16, _type []byte) []byte{
 	buf = append(buf, _type...)
 	buf = append(buf, _stamp...)
 	buf = append(buf, _id...)
+	buf = append(buf, '\n')
 	return buf
 }
 
@@ -45,6 +46,8 @@ func InitMessageUpdate(value uint32, _type []byte) []byte{
 
 	buf = append(buf, _type...)
 	buf = append(buf, _value...)
+	buf = append(buf, '\n')
+
 	return buf
 }
 
