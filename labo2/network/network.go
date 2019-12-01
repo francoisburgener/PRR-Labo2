@@ -224,7 +224,7 @@ func (n *Network) decodeMessage(bytes []byte) {
 	var value uint32
 
 	if _type == messageUPDATE {
-		value := utils.ConverByteArrayToUint32(bytes[3:7])
+		value = utils.ConverByteArrayToUint32(bytes[3:7])
 
 		if n.Debug{
 			log.Printf("Network: Decoded message type:%s value:%d",_type,value)

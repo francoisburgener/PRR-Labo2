@@ -22,10 +22,10 @@ func (p *Process) Init(id uint16, N uint16){
 	p.Id = id
 	p.N = N
 	p.Net = network.Network{
-		Debug: false,
+		Debug: true,
 	}
 	p.Mut = mutex.Mutex{
-		Debug: false,
+		Debug: true,
 	}
 
 	// Ensures everyone has a different seed

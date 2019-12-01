@@ -298,11 +298,12 @@ func (m *Mutex) handleOk(message Message) {
  * Handles incoming update (local or distant)
  */
 func (m *Mutex) handleUpdate(val uint32) {
-	m.resource = val
-
 	if m.Debug {
 		log.Printf("Mutex %d: someone wants to update %d -> %d", m.private.stamp, m.resource, val)
 	}
+
+	m.resource = val
+
 	log.Println("Stamp", m.private.stamp)
 }
 
