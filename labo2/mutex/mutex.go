@@ -19,7 +19,7 @@ const (
 type Network interface {
 	REQ(stamp uint32, id uint16)
 	OK(stamp uint32, id uint16)
-	UPDATE(value uint)
+	UPDATE(value uint32)
 }
 
 /**
@@ -51,10 +51,10 @@ type mutexChans struct {
 	reqChan      chan Message
 	okChan       chan Message
 	endChan      chan bool
-	updateChan   chan uint
+	updateChan   chan uint32
 	askChan      chan bool
 	waitChan     chan bool
-	resourceChan chan uint
+	resourceChan chan uint32
 }
 
 /**
@@ -63,7 +63,7 @@ type mutexChans struct {
 type Mutex struct {
 	private  mutexPrivate
 	channels mutexChans
-	resource uint
+	resource uint32
 	Debug bool
 }
 
@@ -89,10 +89,10 @@ func (m *Mutex) Init(id uint16, initialStamp uint32, numberOfProcess uint16, net
 		reqChan:      make(chan Message),
 		okChan:       make(chan Message),
 		endChan:      make(chan bool),
-		updateChan:   make(chan uint),
+		updateChan:   make(chan uint32),
 		askChan:      make(chan bool),
 		waitChan:     make(chan bool),
-		resourceChan: make(chan uint),
+		resourceChan: make(chan uint32),
 	}
 
 	m.resource = 1000
@@ -135,7 +135,7 @@ func (m *Mutex) End() {
 /**
  * GETTER
  */
-func (m *Mutex) GetResource() uint {
+func (m *Mutex) GetResource() uint32 {
 	m.channels.resourceChan <- 0
 	return <-m.channels.resourceChan
 }
@@ -171,7 +171,7 @@ func (m *Mutex) Ok(stamp uint32, id uint16) {
  * SETTER: call this if you want to change the SC val
  * Never call it without being in SC (ask, wait, update, end)
  */
-func (m *Mutex) Update(value uint) {
+func (m *Mutex) Update(value uint32) {
 	m.channels.updateChan <- value
 }
 
@@ -297,7 +297,7 @@ func (m *Mutex) handleOk(message Message) {
 /**
  * Handles incoming update (local or distant)
  */
-func (m *Mutex) handleUpdate(val uint) {
+func (m *Mutex) handleUpdate(val uint32) {
 	m.resource = val
 
 	if m.Debug {

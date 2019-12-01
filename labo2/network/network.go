@@ -2,8 +2,8 @@ package network
 
 import (
 	"PRR-Labo2/labo2/utils"
+	"bufio"
 	"bytes"
-	"fmt"
 	"io"
 	"log"
 	"net"
@@ -22,7 +22,7 @@ const(
 type Mutex interface {
 	Req(stamp uint32, id uint16)
 	Ok(stamp uint32, id uint16)
-	Update(value uint)
+	Update(value uint32)
 }
 
 /************************************************
@@ -51,10 +51,6 @@ func (n *Network) REQ(stamp uint32, id uint16){
 	//_, err := n.directory[id].Write(msg)
 	mustCopy(n.directory[id], bytes.NewReader(msg))
 
-	/*if err != nil{
-		log.Fatal("Network error: Writing error:", err.Error())
-	}*/
-
 	if n.Debug{
 		log.Printf("Network: Send message type:%s stamp:%d id:%d \n", messageREQ,stamp,id)
 	}
@@ -68,11 +64,7 @@ func (n *Network) REQ(stamp uint32, id uint16){
  */
 func (n *Network) OK(stamp uint32, id uint16){
 	msg := utils.InitMessage(stamp,n.id,[]byte(messageOK))
-	/*_, err := n.directory[id].Write(msg)
 
-	if err != nil{
-		log.Fatal("Network error: Writing error:", err.Error())
-	}*/
 	mustCopy(n.directory[id], bytes.NewReader(msg))
 
 	if n.Debug{
@@ -84,15 +76,11 @@ func (n *Network) OK(stamp uint32, id uint16){
  * Method of Network to send a messageUPDATE message
  * @param value to update
  */
-func (n *Network) UPDATE(value uint){
+func (n *Network) UPDATE(value uint32){
 	for i:=0; i < len(n.directory) + 1; i++{
 		if i != int(n.id){
-			msg := []byte(messageUPDATE + strconv.Itoa(int(value)))
+			msg := utils.InitMessageUpdate(value,[]byte(messageUPDATE))
 			mustCopy(n.directory[uint16(i)], bytes.NewReader(msg))
-			/*_, err := n.directory[uint16(i)].Write([]byte(messageUPDATE + strconv.Itoa(int(value))))
-			if err != nil{
-				log.Fatal("Network error: Writing error:", err.Error())
-			}*/
 
 			if n.Debug{
 				log.Printf("Network: Send message Update P%d value: %d",i,value)
@@ -218,25 +206,25 @@ func (n *Network)handleConn(conn net.Conn) {
 		if err != nil {
 			log.Fatal("Network error: Error reading:", err.Error())
 		}
-		n.decodeMessage(buf,l)
+
+		s := bufio.NewScanner(bytes.NewReader(buf[0:l]))
+
+		for s.Scan(){
+			n.decodeMessage(s.Bytes())
+		}
+
 	}
 }
 
-func (n *Network) decodeMessage(bytes []byte,l int) {
+func (n *Network) decodeMessage(bytes []byte) {
 
 	_type := string(bytes[0:3])
 	var stamp uint32
 	var id uint16
-	var value uint
-
-	fmt.Println(bytes, "len", l)
+	var value uint32
 
 	if _type == messageUPDATE {
-		tmp, err := strconv.Atoi(string(bytes[3:l]))
-		if err != nil{
-			log.Fatal("Network error: Update message without value:", err.Error())
-		}
-		value = uint(tmp)
+		value := utils.ConverByteArrayToUint32(bytes[3:7])
 
 		if n.Debug{
 			log.Printf("Network: Decoded message type:%s value:%d",_type,value)
@@ -244,7 +232,7 @@ func (n *Network) decodeMessage(bytes []byte,l int) {
 
 	}else if _type == messageOK || _type == messageREQ {
 		stamp = utils.ConverByteArrayToUint32(bytes[3:7])
-		id = utils.ConverByteArrayToUint16(bytes[7:l])
+		id = utils.ConverByteArrayToUint16(bytes[7:9])
 
 		if n.Debug{
 			log.Printf("Network: Decoded message type:%s stamp:%d id:%d",_type,stamp,id)
