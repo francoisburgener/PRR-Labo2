@@ -1,8 +1,11 @@
 
 #!/bin/bash
 echo "Bash version ${BASH_VERSION}..."
-for i in {0..10..1}
+
+for i in {0..4}
   do 
-     echo "Welcome $i times"
+     gnome-terminal -x bash -c "go run main.go -proc $i -N $1; exec bash"
+     sleep 0.5s
  done
-#gnome-terminal -x bash -c "<my command or script>; exec bash"
+
+
