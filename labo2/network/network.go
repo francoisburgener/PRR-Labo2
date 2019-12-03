@@ -267,20 +267,3 @@ func mustCopy(dst io.Writer, src io.Reader) {
 		log.Fatal(err)
 	}
 }
-
-
-
-/*func main(){
-	n := Network{}
-	n.directory = make(map[uint16]net.Conn,2)
-	n.Done = make(chan string)
-	n.nProc = 2
-
-	go n.initServ(2)
-	n.initConn(2,1)
-	n.MessageREQ(50000,2)
-	//n.MessageUPDATE(42)
-	select {
-
-	}
-}*/
