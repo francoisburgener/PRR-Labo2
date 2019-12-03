@@ -12,6 +12,7 @@
 package processus
 
 import (
+	"PRR-Labo2/labo2/config"
 	"PRR-Labo2/labo2/mutex"
 	"PRR-Labo2/labo2/network"
 	"math/rand"
@@ -33,10 +34,10 @@ func (p *Process) Init(id uint16, N uint16){
 	p.Id = id
 	p.N = N
 	p.Net = network.Network{
-		Debug: true,
+		Debug: config.Debug_Network,
 	}
 	p.Mut = mutex.Mutex{
-		Debug: true,
+		Debug: config.Debug_Mutex,
 	}
 
 	// Ensures everyone has a different seed

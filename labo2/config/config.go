@@ -18,4 +18,6 @@ const (
 	MessageREQ    = "REQ"
 	MessageOK     = "OK_"
 	MessageUPDATE = "UPD"
+	Debug_Mutex = false
+	Debug_Network = false
 )
