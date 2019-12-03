@@ -5,7 +5,7 @@
  Authors   	 : François Burgener - Tiago P. Quinteiro
  Date        : 03.12.2019
 
- Goal        : ...
+ Goal        : Little client using a mutex based on the Carvalho et Roucairol algorithm
  -----------------------------------------------------------------------------------
 */
 
