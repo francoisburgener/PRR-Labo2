@@ -1,6 +1,7 @@
 package network
 
 import (
+	"PRR-Labo2/labo2/config"
 	"PRR-Labo2/labo2/utils"
 	"bufio"
 	"bytes"
@@ -10,11 +11,6 @@ import (
 	"strconv"
 )
 
-const(
-	messageREQ    = "REQ"
-	messageOK     = "OK_"
-	messageUPDATE = "UPD"
-)
 
 /************************************************
 *                   INTERFACE       		    *
@@ -42,44 +38,44 @@ type Network struct {
 *************************************************/
 
 /**
- * Method of Network to send a messageREQ message
+ * Method of Network to send a MessageREQ message
  * @param stamp (logic clock) of the processus
  * @param id of the processus
  */
 func (n *Network) REQ(stamp uint32, id uint16){
-	msg := utils.InitMessage(stamp,n.id,[]byte(messageREQ))
+	msg := utils.InitMessage(stamp,n.id,[]byte(config.MessageREQ))
 	//_, err := n.directory[id].Write(msg)
 	mustCopy(n.directory[id], bytes.NewReader(msg))
 
 	if n.Debug{
-		log.Printf("Network: Send message type:%s stamp:%d id:%d \n", messageREQ,stamp,id)
+		log.Printf("Network: Send message type:%s stamp:%d id:%d \n", config.MessageREQ,stamp,id)
 	}
 
 }
 
 /**
- * Method of Network to send a messageREQ message
+ * Method of Network to send a MessageREQ message
  * @param stamp (logic clock) of the processus
  * @param id of the processus
  */
 func (n *Network) OK(stamp uint32, id uint16){
-	msg := utils.InitMessage(stamp,n.id,[]byte(messageOK))
+	msg := utils.InitMessage(stamp,n.id,[]byte(config.MessageOK))
 
 	mustCopy(n.directory[id], bytes.NewReader(msg))
 
 	if n.Debug{
-		log.Printf("Network: Send message type:%s stamp:%d id:%d \n", messageOK,stamp,id)
+		log.Printf("Network: Send message type:%s stamp:%d id:%d \n", config.MessageOK,stamp,id)
 	}
 }
 
 /**
- * Method of Network to send a messageUPDATE message
+ * Method of Network to send a MessageUPDATE message
  * @param value to update
  */
 func (n *Network) UPDATE(value uint32){
 	for i:=0; i < len(n.directory) + 1; i++{
 		if i != int(n.id){
-			msg := utils.InitMessageUpdate(value,[]byte(messageUPDATE))
+			msg := utils.InitMessageUpdate(value,[]byte(config.MessageUPDATE))
 			mustCopy(n.directory[uint16(i)], bytes.NewReader(msg))
 
 			if n.Debug{
@@ -223,14 +219,14 @@ func (n *Network) decodeMessage(bytes []byte) {
 	var id uint16
 	var value uint32
 
-	if _type == messageUPDATE {
+	if _type == config.MessageUPDATE {
 		value = utils.ConverByteArrayToUint32(bytes[3:7])
 
 		if n.Debug{
 			log.Printf("Network: Decoded message type:%s value:%d",_type,value)
 		}
 
-	}else if _type == messageOK || _type == messageREQ {
+	}else if _type == config.MessageOK || _type == config.MessageREQ {
 		stamp = utils.ConverByteArrayToUint32(bytes[3:7])
 		id = utils.ConverByteArrayToUint16(bytes[7:9])
 
@@ -242,11 +238,11 @@ func (n *Network) decodeMessage(bytes []byte) {
 
 
 	switch _type {
-	case messageREQ:
+	case config.MessageREQ:
 		n.mutex.Req(stamp,id)
-	case messageOK:
+	case config.MessageOK:
 		n.mutex.Ok(stamp,id)
-	case messageUPDATE:
+	case config.MessageUPDATE:
 		n.mutex.Update(value)
 	default:
 		log.Println("Network: Incorrect type message !")
@@ -269,8 +265,8 @@ func mustCopy(dst io.Writer, src io.Reader) {
 
 	go n.initServ(2)
 	n.initConn(2,1)
-	n.messageREQ(50000,2)
-	//n.messageUPDATE(42)
+	n.MessageREQ(50000,2)
+	//n.MessageUPDATE(42)
 	select {
 
 	}
