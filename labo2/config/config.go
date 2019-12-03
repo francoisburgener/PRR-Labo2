@@ -5,7 +5,8 @@
  Authors   	 : François Burgener - Tiago P. Quinteiro
  Date        : 03.12.2019
 
- Goal        : ...
+ Goal        : Fichier de config avec l'address réseau ainsi que le port, ainsi que
+               les trois type de message (REQ,OK et UPDATE)
  -----------------------------------------------------------------------------------
 */
 

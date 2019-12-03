@@ -5,7 +5,9 @@
  Authors   	 : François Burgener - Tiago P. Quinteiro
  Date        : 03.12.2019
 
- Goal        : ...
+ Goal        : Fichier qui initialise le network de notre processus. Il permet d'envoyer
+			   et de reçevoir des message qui seront emit au mutex en fonction du type
+               de message
  -----------------------------------------------------------------------------------
 */
 

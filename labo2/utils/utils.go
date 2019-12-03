@@ -5,7 +5,9 @@
  Authors   	 : François Burgener - Tiago P. Quinteiro
  Date        : 03.12.2019
 
- Goal        : ...
+ Goal        : Fichier avec quelque method utile pour notre programme convertion uintX
+               en tableau de byte et inversement. Ainsi qu'une initialisation des
+			   different message (REQ,OK,UPDATE)
  -----------------------------------------------------------------------------------
 */
 

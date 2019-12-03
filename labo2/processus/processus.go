@@ -5,7 +5,7 @@
  Authors   	 : François Burgener - Tiago P. Quinteiro
  Date        : 03.12.2019
 
- Goal        : ...
+ Goal        : Fichier qui initialise un processus (mutex et network)
  -----------------------------------------------------------------------------------
 */
 
