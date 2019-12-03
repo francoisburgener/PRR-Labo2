@@ -270,6 +270,25 @@ func (m *Mutex) handleEnd() {
 func (m *Mutex) handleReq(message Message) {
 	m.incrementClock(message.stamp) // Increment, max between mine and P
 
+	if m.private.state == REST {
+
+		m.private.netWorker.OK(m.private.stamp, message.id) //Sending the signal
+		m.private.pWait[message.id] = true // Adding to waiting set
+	} else {
+		if m.private.state == CRITICAL ||
+			m.private.stampAsk < message.stamp ||
+			(m.private.stampAsk == message.stamp && m.private.me < message.id) {
+
+			m.private.pDiff[message.id] = true // We have to differ the obtain from other P
+		} else {
+			m.private.netWorker.OK(m.private.stamp, message.id) // Sending the signal
+			m.private.pWait[message.id] = true // Adding to waiting set
+			m.private.netWorker.REQ(m.private.stampAsk, message.id) // We send back the request
+		}
+	}
+
+	// OLD
+/*
 	if m.private.state == CRITICAL ||
 		m.private.state == WAITING &&
 			m.private.stampAsk < message.stamp ||
@@ -281,7 +300,7 @@ func (m *Mutex) handleReq(message Message) {
 		m.private.pWait[message.id] = true // Adding to waiting set
 		m.private.netWorker.OK(m.private.stamp, message.id) //Sending the signal
 	}
-
+*/
 	if m.Debug {
 		log.Printf("Mutex %d: Req received from %d", m.private.stamp, message.id)
 
