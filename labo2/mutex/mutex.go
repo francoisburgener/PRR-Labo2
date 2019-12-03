@@ -245,8 +245,8 @@ func (m *Mutex) handleAsk() {
 
 	if m.Debug {
 		log.Printf("Mutex %d: Client asked me the CS", m.private.stamp)
+		log.Println("Stamp", m.private.stamp)
 	}
-	log.Println("Stamp", m.private.stamp)
 }
 
 /**
@@ -260,8 +260,8 @@ func (m *Mutex) handleEnd() {
 
 	if m.Debug {
 		log.Printf("Mutex %d: Client released the CS", m.private.stamp)
+		log.Println("Stamp", m.private.stamp)
 	}
-	log.Println("Stamp", m.private.stamp)
 }
 
 /**
@@ -287,28 +287,14 @@ func (m *Mutex) handleReq(message Message) {
 		}
 	}
 
-	// OLD
-/*
-	if m.private.state == CRITICAL ||
-		m.private.state == WAITING &&
-			m.private.stampAsk < message.stamp ||
-		(m.private.stampAsk == message.stamp && m.private.me < message.id) {
-
-		m.private.pDiff[message.id] = true // We have to differ the obtain from other P
-	} else {
-
-		m.private.pWait[message.id] = true // Adding to waiting set
-		m.private.netWorker.OK(m.private.stamp, message.id) //Sending the signal
-	}
-*/
 	if m.Debug {
 		log.Printf("Mutex %d: Req received from %d", m.private.stamp, message.id)
 
 		for key, _ := range m.private.pWait  {
 			log.Printf("Mutex: Waiting on him %d\n", key)
 		}
+		log.Println("Stamp", m.private.stamp)
 	}
-	log.Println("Stamp", m.private.stamp)
 }
 
 /**
@@ -320,21 +306,21 @@ func (m *Mutex) handleOk(message Message) {
 
 	if m.Debug {
 		log.Printf("Mutex %d: Ok received from %d", m.private.stamp, message.id)
+		log.Println("Stamp", m.private.stamp)
 	}
-	log.Println("Stamp", m.private.stamp)
 }
 
 /**
  * Handles incoming update (local or distant)
  */
 func (m *Mutex) handleUpdate(val uint32) {
-	if m.Debug {
-		log.Printf("Mutex %d: someone wants to update %d -> %d", m.private.stamp, m.resource, val)
-	}
+	log.Printf("Mutex %d: someone wants to update %d -> %d", m.private.stamp, m.resource, val)
 
 	m.resource = val
 
-	log.Println("Stamp", m.private.stamp)
+	if m.Debug {
+		log.Println("Stamp", m.private.stamp)
+	}
 }
 
 /**
